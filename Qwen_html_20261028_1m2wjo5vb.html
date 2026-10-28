@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarik Tambang Kuadrat — Lomba Persamaan Kuadrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2a2118; --paper:#fff7e6;
+  --red:#e2483d; --red-d:#a92a20; --red-l:#ff8a7d;
+  --blue:#2f80d0; --blue-d:#1b5a9e; --blue-l:#7db6ef;
+  --yellow:#ffc531; --yellow-d:#e09a00;
+  --good:#4fae4f; --grass2:#5faa3c;
+  --sky1:#7cc7ea; --sky2:#cfeefb;
+  --step:56px; --tug:78px;
+  --disp:'Lilita One',system-ui,cursive;
+  --body:'Nunito',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:var(--body);color:var(--ink);overflow-x:hidden;background:var(--sky2)}
+button{font-family:inherit;cursor:pointer}
+
+/* ============ PANORAMA LOMBA (langit, matahari, awan, bukit, bendera, penonton) ============ */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;
+  background:linear-gradient(var(--sky1) 0%,var(--sky2) 52%,#8fd06a 52%,#8fd06a 58%,var(--grass2) 58%)}
+.sun{position:absolute;top:38px;right:7%;width:84px;height:84px;border-radius:50%;
+  background:#ffde6b;box-shadow:0 0 46px 14px rgba(255,220,110,.7)}
+.sun i{position:absolute;inset:-42px;border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,222,110,.5) 0deg 7deg,transparent 7deg 16deg);
+  animation:spin 42s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cloud{position:absolute;width:120px;height:34px;background:#fff;border-radius:40px;opacity:.95;
+  animation:drift linear infinite}
+.cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:52px;height:52px;top:-26px;left:18px}
+.cloud::after{width:38px;height:38px;top:-18px;right:20px}
+.c1{top:9%;animation-duration:75s}
+.c2{top:18%;transform:scale(.7);animation-duration:105s;animation-delay:-30s}
+.c3{top:5%;transform:scale(1.25);animation-duration:130s;animation-delay:-70s}
+@keyframes drift{from{left:-220px}to{left:110%}}
+.hill{position:absolute;border-radius:50% 50% 0 0}
+.hill.back{left:-12%;width:124%;bottom:36vh;height:22vh;background:#8fd06a}
+.hill.front{left:-14%;width:128%;bottom:-6vh;height:46vh;background:var(--grass2);
+  background-image:repeating-linear-gradient(100deg,rgba(255,255,255,.07) 0 70px,transparent 70px 140px)}
+.bunting{position:absolute;top:74px;left:-2%;right:-2%;display:flex;justify-content:space-between;
+  padding:0 8px;border-top:3px solid #7a5a33;transform-origin:top center;animation:sway 6s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-.5deg)}to{transform:rotate(.5deg)}}
+.bflag{width:26px;height:30px;clip-path:polygon(0 0,100% 0,50% 100%);margin-top:-1px}
+.crowd{position:absolute;top:52vh;left:0;right:0;height:34px}
+.spectator{position:absolute;bottom:0;width:13px;border-radius:6px 6px 2px 2px;
+  animation:bob 1.1s ease-in-out infinite alternate}
+.spectator::before{content:'';position:absolute;top:-9px;left:1px;width:11px;height:11px;border-radius:50%;background:#f2c69b}
+@keyframes bob{to{transform:translateY(-4px)}}
+.crowd.excited .spectator{animation-duration:.32s;animation-name:bobbig}
+@keyframes bobbig{to{transform:translateY(-9px)}}
+.flower{position:absolute;width:16px;height:16px;border-radius:50%;
+  background:radial-gradient(circle,#ffd23e 0 3.5px,#fff 4px 7px,transparent 7.5px);
+  animation:sway2 3.4s ease-in-out infinite alternate}
+@keyframes sway2{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+
+/* ============ HEADER ============ */
+header{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:12px clamp(12px,3vw,26px)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-badge{width:46px;height:46px;border-radius:50%;background:var(--yellow);border:3px solid var(--ink);
+  display:grid;place-items:center;font-size:24px;box-shadow:3px 3px 0 var(--ink);transform:rotate(-6deg)}
+.logo h1{font-family:var(--disp);font-size:clamp(1.15rem,2.6vw,1.7rem);line-height:.95;color:#fff;
+  letter-spacing:.5px;text-shadow:-2px 2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink),4px 5px 0 rgba(0,0,0,.18)}
+.logo h1 b{color:var(--yellow)}
+.round-chip{position:relative;z-index:5;display:flex;align-items:center;gap:8px;background:var(--paper);
+  border:3px solid var(--ink);border-radius:999px;padding:8px 16px;font-weight:800;font-size:.95rem;
+  box-shadow:4px 4px 0 rgba(42,33,24,.85);white-space:nowrap}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.dot.team-L{background:var(--red)}.dot.team-R{background:var(--blue)}
+#soundBtn{background:var(--paper);border:3px solid var(--ink);border-radius:12px;width:44px;height:44px;
+  font-size:20px;box-shadow:3px 3px 0 var(--ink);transition:transform .15s}
+#soundBtn:hover{transform:translateY(-2px) rotate(-4deg)}
+#soundBtn:active{transform:translateY(2px)}
+
+/* ============ ARENA TARIK TAMBANG ============ */
+.arena{position:relative;z-index:2;height:clamp(280px,44vh,430px);margin:2px 10px 0;overflow:hidden}
+.arena::before,.arena::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .45s}
+.arena::before{background:linear-gradient(90deg,rgba(226,72,61,.20),transparent 28%)}
+.arena::after{background:linear-gradient(-90deg,rgba(47,128,208,.20),transparent 28%)}
+.arena.turn-L::before{opacity:1}
+.arena.turn-R::after{opacity:1}
+
+.plate{position:absolute;top:6px;z-index:6;background:var(--paper);border:3px solid var(--ink);
+  border-radius:14px;padding:8px 14px;box-shadow:5px 5px 0 rgba(42,33,24,.8);max-width:38%}
+.plate-left{left:8px;transform:rotate(-1.6deg);border-top:8px solid var(--red)}
+.plate-right{right:8px;transform:rotate(1.6deg);text-align:right;border-top:8px solid var(--blue)}
+.pname{font-family:var(--disp);font-size:clamp(.85rem,1.8vw,1.1rem);letter-spacing:.5px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.pips{display:flex;gap:5px;margin-top:5px}
+.plate-right .pips{justify-content:flex-end}
+.pip{width:17px;height:17px;border:2.5px solid var(--ink);border-radius:50%;background:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;transition:transform .3s,background .3s}
+.pip.ok{background:var(--good);transform:scale(1.15)}
+.pip.no{background:var(--red);transform:scale(1.15)}
+
+.tick{position:absolute;top:calc(57% + 26px);width:4px;height:15px;background:rgba(255,255,255,.8);
+  border-radius:2px;transform:translateX(-50%)}
+.tick span{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;
+  color:#ffffff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.tick.center{background:var(--yellow);height:20px;width:6px}
+.win-line{position:absolute;top:calc(57% - 76px);height:116px;border-left:4px dashed rgba(255,255,255,.9);z-index:2}
+.win-line::before{content:'GARIS';position:absolute;top:-24px;left:-26px;font-family:var(--disp);
+  font-size:.72rem;color:#fff;text-shadow:1.5px 1.5px 0 var(--ink);letter-spacing:1px}
+.mud{position:absolute;top:calc(57% + 12px);left:50%;transform:translateX(-50%);width:110px;height:26px;
+  border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#8a5a30,#5f3c1c);z-index:1}
+
+.rig{position:absolute;inset:0;z-index:3;transition:transform .9s cubic-bezier(.22,1.5,.36,1)}
+.rope{position:absolute;top:57%;left:-30%;width:160%;height:16px;border-radius:9px;
+  border:2.5px solid #5d3a17;filter:drop-shadow(0 4px 2px rgba(0,0,0,.25));
+  background:repeating-linear-gradient(60deg,#a9713d 0 11px,#8a5527 11px 22px)}
+.rope.yank{animation:yank .5s ease}
+@keyframes yank{30%{transform:scaleY(1.4)}60%{transform:scaleY(.8)}}
+.flagpole{position:absolute;left:50%;top:calc(57% - 44px);width:5px;height:54px;background:#6e4520;
+  border-radius:3px;transform:translateX(-50%)}
+.pennant{position:absolute;left:4px;top:2px;width:0;height:0;border-top:12px solid transparent;
+  border-bottom:12px solid transparent;border-left:34px solid var(--red);
+  filter:drop-shadow(2px 2px 0 rgba(0,0,0,.2));transform-origin:left center;animation:wave 1.4s ease-in-out infinite alternate}
+@keyframes wave{to{transform:skewY(7deg) scaleX(.94)}}
+
+.crew{position:absolute;top:calc(57% + 8px - var(--tug)*0.545);display:flex;gap:6px;z-index:4;
+  transition:transform .9s cubic-bezier(.22,1.5,.36,1)}
+.crew-left{right:calc(50% + 4.35*var(--step))}
+.crew-right{left:calc(50% + 4.35*var(--step))}
+.crew-left{--jersey:var(--red);--shorts:var(--red-d);--band:#fff}
+.crew-right{--jersey:var(--blue);--shorts:var(--blue-d);--band:var(--yellow)}
+.tug{display:inline-block}
+.tug svg{width:var(--tug);height:calc(var(--tug)*1.2);display:block}
+.crew-right .tug svg{transform:scaleX(-1)}
+.crew-left .tug{animation:heaveL var(--heave,1.1s) ease-in-out infinite alternate}
+.crew-right .tug{animation:heaveR var(--heave,1.1s) ease-in-out infinite alternate}
+.tug:nth-child(2){animation-delay:.22s}.tug:nth-child(3){animation-delay:.44s}
+@keyframes heaveL{to{transform:translateX(-8px) rotate(-3.5deg)}}
+@keyframes heaveR{to{transform:translateX(8px) rotate(3.5deg)}}
+.crew.strain{--heave:1.8s}.crew.leading{--heave:.62s}
+.crew.cheer .tug{animation:hop .45s ease 2}
+@keyframes hop{35%{transform:translateY(-18px) rotate(-7deg)}}
+.crew.slip .tug{animation:slip .55s ease}
+@keyframes slip{25%{transform:translateX(11px) rotate(6deg)}60%{transform:translateX(-7px) rotate(-4deg)}}
+
+/* ============ METER TALI ============ */
+.meter{position:relative;z-index:2;width:min(560px,92%);margin:8px auto 4px;background:var(--paper);
+  border:3px solid var(--ink);border-radius:999px;padding:7px 12px;box-shadow:4px 4px 0 rgba(42,33,24,.8)}
+.mrow{display:flex;align-items:center;gap:10px;font-weight:900;font-size:.78rem}
+.mlab{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mlab.l{color:var(--red-d)}.mlab.r{color:var(--blue-d);text-align:right}
+.mtrack{position:relative;flex:0 0 46%;height:14px;border:2.5px solid var(--ink);border-radius:999px;
+  background:linear-gradient(90deg,rgba(226,72,61,.4) 0 50%,rgba(47,128,208,.4) 50% 100%)}
+.mtrack .notch{position:absolute;top:-2px;width:2px;height:14px;background:rgba(42,33,24,.35)}
+.mmark{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:18px;
+  transition:left .9s cubic-bezier(.22,1.5,.36,1);filter:drop-shadow(1px 2px 0 rgba(0,0,0,.25))}
+#meterText{display:block;text-align:center;font-size:.72rem;font-weight:800;margin-top:3px;opacity:.75}
+
+/* ============ KARTU SOAL ============ */
+.qcard{position:fixed;left:50%;bottom:16px;z-index:30;width:min(880px,94vw);
+  transform:translate(-50%,130%);transition:transform .55s cubic-bezier(.2,1.3,.35,1);
+  background:var(--paper);border:4px solid var(--ink);border-radius:20px;overflow:visible;
+  box-shadow:0 10px 0 rgba(42,33,24,.85),0 24px 40px rgba(0,0,0,.25)}
+.qcard.open{transform:translate(-50%,0)}
+.qhead{display:flex;align-items:center;gap:12px;padding:11px 18px;color:#fff;
+  border-bottom:4px solid var(--ink);border-radius:15px 15px 0 0}
+.qcard.team-L .qhead{background:var(--red)}
+.qcard.team-R .qhead{background:var(--blue)}
+.qteam-tag{font-family:var(--disp);font-size:.75rem;background:rgba(0,0,0,.28);padding:4px 10px;
+  border-radius:999px;letter-spacing:1.5px}
+#qTeamLabel{font-family:var(--disp);font-size:clamp(1.05rem,2.4vw,1.45rem);letter-spacing:.5px;flex:1;
+  text-shadow:2px 2px 0 rgba(0,0,0,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#qnum{font-weight:900;font-size:.85rem;background:rgba(0,0,0,.22);padding:4px 10px;border-radius:8px}
+.timer{position:relative;width:46px;height:46px;flex:none}
+.timer svg{transform:rotate(-90deg)}
+.tbg{fill:none;stroke:rgba(255,255,255,.3);stroke-width:5}
+.tfg{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-dasharray:113.1;transition:stroke-dashoffset .2s linear}
+.timer.low .tfg{stroke:var(--yellow)}
+.timer span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--disp);
+  font-size:1rem;color:#fff}
+.timer.low span{color:var(--yellow);animation:pulse .5s ease infinite alternate}
+@keyframes pulse{to{transform:scale(1.2)}}
+.qbody{padding:18px clamp(14px,3vw,26px) 20px}
+.qtext{font-size:clamp(1.05rem,2.2vw,1.35rem);font-weight:800;line-height:1.45;margin-bottom:14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.opt{display:flex;align-items:center;gap:11px;padding:13px 14px;background:#fff;border:3px solid var(--ink);
+  border-radius:14px;font-weight:800;font-size:clamp(.95rem,1.6vw,1.12rem);text-align:left;
+  box-shadow:0 4px 0 var(--ink);transition:transform .15s,box-shadow .15s,background .25s,opacity .25s}
+.opt:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--ink)}
+.opt:not(:disabled):active{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
+.opt .key{flex:none;width:34px;height:34px;border-radius:50%;background:var(--yellow);
+  border:3px solid var(--ink);font-family:var(--disp);display:grid;place-items:center;font-size:1rem}
+.opt.good{background:#dff3d0;border-color:#2f7d32;box-shadow:0 4px 0 #2f7d32;animation:pop .4s ease}
+.opt.bad{background:#fbdcdc;border-color:#b3362b;box-shadow:0 4px 0 #b3362b;animation:shake .4s ease}
+.opt.off{opacity:.4}
+.opt:disabled{cursor:default}
+@keyframes pop{40%{transform:scale(1.06)}}
+@keyframes shake{25%{transform:translateX(-7px)}55%{transform:translateX(6px)}80%{transform:translateX(-3px)}}
+.stamp{position:absolute;top:-30px;left:22px;font-family:var(--disp);font-size:clamp(1.4rem,3.4vw,2rem);
+  padding:6px 18px;border:4px solid;border-radius:14px;background:#fff;letter-spacing:1px;
+  animation:stampIn .45s cubic-bezier(.2,1.7,.4,1);box-shadow:4px 4px 0 rgba(42,33,24,.85)}
+.stamp.ok{color:#2f7d32;border-color:#2f7d32;transform:rotate(-4deg)}
+.stamp.no{color:#b3362b;border-color:#b3362b;transform:rotate(3deg)}
+@keyframes stampIn{from{transform:scale(2.4) rotate(-14deg);opacity:0}}
+.explain{margin-top:14px;background:#fff3c9;border:3px solid var(--yellow-d);border-radius:12px;
+  padding:11px 14px;font-weight:700;font-size:.95rem;line-height:1.5}
+.next-row{display:flex;justify-content:flex-end;margin-top:14px}
+.btn{font-family:var(--disp);letter-spacing:1px;border:3px solid var(--ink);border-radius:14px;
+  box-shadow:0 6px 0 var(--ink);transition:transform .12s,box-shadow .12s;font-size:1.05rem;padding:12px 26px}
+.btn:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--ink)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.btn-go{background:var(--yellow)}
+.btn-red{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-plain{background:#fff}
+
+/* ============ SPLASH, OVERLAY, KONFETI ============ */
+.splash{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none;text-align:center}
+.splash-txt{font-family:var(--disp);font-size:clamp(2rem,7vw,4rem);letter-spacing:1px;opacity:0;
+  text-shadow:-3px 3px 0 var(--ink),3px 3px 0 var(--ink),3px -3px 0 var(--ink),-3px -3px 0 var(--ink),6px 8px 0 rgba(0,0,0,.2)}
+.splash-txt small{display:block;font-size:.42em;color:#fff;letter-spacing:3px}
+.splash-txt.show{animation:splashIn 1s ease forwards}
+@keyframes splashIn{0%{opacity:0;transform:scale(.3) rotate(-6deg)}25%{opacity:1;transform:scale(1.12) rotate(2deg)}
+  55%{transform:scale(1)}85%{opacity:1}100%{opacity:0;transform:scale(1.05)}}
+.overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;
+  background:rgba(30,44,64,.62)}
+.overlay[hidden]{display:none}
+.ov-card{position:relative;z-index:1;background:var(--paper);border:5px solid var(--ink);border-radius:24px;
+  width:min(660px,94vw);padding:clamp(20px,4vw,34px);box-shadow:0 14px 0 rgba(42,33,24,.9),0 30px 60px rgba(0,0,0,.35);
+  text-align:center;transform:rotate(-.6deg)}
+.kicker{font-weight:900;font-size:.8rem;letter-spacing:3px;color:var(--red-d)}
+.ov-card h2{font-family:var(--disp);font-size:clamp(1.7rem,5vw,2.7rem);line-height:1.05;margin:8px 0 4px}
+.ov-card h2 .r{color:var(--red)}.ov-card h2 .b{color:var(--blue)}.ov-card h2 .y{color:var(--yellow-d)}
+.rules{list-style:none;text-align:left;margin:16px auto;max-width:480px;display:grid;gap:9px;font-weight:700}
+.rules li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
+.rules .ic{flex:none;font-size:1.2rem}
+.team-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+.tf label{display:block;font-family:var(--disp);font-size:.8rem;letter-spacing:1px;margin-bottom:5px}
+.tf.l label{color:var(--red-d)}.tf.r label{color:var(--blue-d)}
+.tf input{width:100%;border:3px solid var(--ink);border-radius:12px;padding:11px;font-weight:900;
+  font-size:1rem;text-align:center;text-transform:uppercase;font-family:var(--body);background:#fff}
+.tf.l input:focus{outline:3px solid var(--red-l)}.tf.r input:focus{outline:3px solid var(--blue-l)}
+.big{font-size:1.3rem;padding:15px 34px}
+#trophy{font-size:4rem;line-height:1;animation:hop 1s ease infinite}
+#endTitle{font-family:var(--disp);font-size:clamp(1.8rem,5.5vw,2.9rem);margin:6px 0}
+#endDesc{font-weight:800;margin-bottom:14px}
+.stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.stat{border:3px solid var(--ink);border-radius:14px;background:#fff;padding:10px 18px;min-width:170px}
+.stat h4{font-family:var(--disp);letter-spacing:.5px;margin-bottom:4px}
+.stat.l h4{color:var(--red-d)}.stat.r h4{color:var(--blue-d)}
+.stat .n{font-family:var(--disp);font-size:1.6rem}
+.ov-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+#confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+#confetti span{position:absolute;top:-24px;display:block;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(760deg)}}
+.credit{position:fixed;right:10px;bottom:6px;z-index:1;font-size:.68rem;font-weight:800;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.noanim,.noanim *{transition:none !important}
+
+@media (max-width:900px){:root{--tug:62px}.opts{gap:9px}}
+@media (max-width:640px){
+  :root{--tug:50px}
+  .arena{height:clamp(230px,36vh,320px)}
+  .round-chip{font-size:.75rem;padding:6px 10px}
+  .opts{grid-template-columns:1fr}
+  .opt{padding:10px 12px}
+  .plate{padding:6px 10px}.pname{max-width:110px}
+  .pip{width:14px;height:14px;font-size:9px}
+  .team-form{grid-template-columns:1fr}
+  .qcard{bottom:8px}
+}
+@media (max-width:430px){:root{--tug:42px}}
+</style>
+</head>
+<body>
+
+<!-- simbol penarik tambang -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tugger" viewBox="0 0 110 132">
+    <path d="M47 86 Q38 100 27 112" fill="none" stroke="#f2b07c" stroke-width="9" stroke-linecap="round"/>
+    <path d="M53 86 Q60 100 69 110" fill="none" stroke="#f2b07c" stroke-width="9" stroke-linecap="round"/>
+    <ellipse cx="24" cy="115" rx="9" ry="5" fill="#33302b"/>
+    <ellipse cx="73" cy="113" rx="9" ry="5" fill="#33302b"/>
+    <rect x="37" y="74" width="24" height="17" rx="7" fill="var(--shorts)" transform="rotate(-16 49 82)"/>
+    <rect x="33" y="42" width="24" height="40" rx="10" fill="var(--jersey)" transform="rotate(-22 45 62)"/>
+    <path d="M46 52 L86 58" stroke="#f2b07c" stroke-width="8" stroke-linecap="round"/>
+    <path d="M44 61 L84 63" stroke="#f2b07c" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="87" cy="58" r="5.5" fill="#e59d66"/>
+    <circle cx="85" cy="63" r="5.5" fill="#e59d66"/>
+    <circle cx="30" cy="23" r="13.5" fill="#4a3123"/>
+    <circle cx="33" cy="29" r="13" fill="#f2b07c"/>
+    <rect x="19" y="18" width="28" height="7" rx="3.5" fill="var(--band)" transform="rotate(-8 33 22)"/>
+    <path d="M21 21 l-9 -5 l4 8 z" fill="var(--band)"/>
+    <circle cx="40" cy="28" r="1.9" fill="#2a2118"/>
+    <path d="M36 23 l7 2" stroke="#2a2118" stroke-width="1.7" stroke-linecap="round"/>
+    <rect x="37" y="34" width="7" height="3.6" rx="1.8" fill="#8c4a32"/>
+    <path d="M51 16 q3.5 5 0 8 q-4.5 -3.5 0 -8" fill="#7cc4e8"/>
+  </symbol>
+</svg>
+
+<div class="scene" aria-hidden="true">
+  <div class="sun"><i></i></div>
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="hill back"></div><div class="hill front"></div>
+  <div class="bunting" id="bunting"></div>
+  <div class="crowd" id="crowd"></div>
+  <div id="flowers"></div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-badge">🪢</div>
+    <h1>TARIK TAMBANG<br><b>KUADRAT</b></h1>
+  </div>
+  <div class="round-chip" id="roundChip"><span class="dot team-L" id="chipDot"></span><span id="chipText">Bersiap…</span></div>
+  <button id="soundBtn" title="Suara" aria-label="Suara">🔊</button>
+</header>
+
+<main>
+  <section class="arena" id="arena">
+    <div class="plate plate-left"><div class="pname" id="nameL">TIM MERAH</div><div class="pips" id="pipsL"></div></div>
+    <div class="plate plate-right"><div class="pname" id="nameR">TIM BIRU</div><div class="pips" id="pipsR"></div></div>
+    <div id="ticks"></div>
+    <div class="win-line" id="winL" style="left:calc(50% - 4*var(--step))"></div>
+    <div class="win-line" id="winR" style="left:calc(50% + 4*var(--step))"></div>
+    <div class="mud"></div>
+    <div class="rig" id="rig">
+      <div class="rope" id="rope"></div>
+      <div class="flagpole"><div class="pennant"></div></div>
+    </div>
+    <div class="crew crew-left" id="crewL"></div>
+    <div class="crew crew-right" id="crewR"></div>
+  </section>
+
+  <div class="meter">
+    <div class="mrow">
+      <span class="mlab l" id="mLabL">◀ TIM MERAH</span>
+      <div class="mtrack" id="mtrack"><span class="mmark" id="mmark">🚩</span></div>
+      <span class="mlab r" id="mLabR">TIM BIRU ▶</span>
+    </div>
+    <span id="meterText">Tali tepat di tengah ⚖️</span>
+  </div>
+</main>
+
+<div class="splash"><div class="splash-txt" id="splashTxt"></div></div>
+
+<section class="qcard" id="qcard" aria-live="polite">
+  <div class="qhead">
+    <span class="qteam-tag">GILIRAN</span>
+    <span id="qTeamLabel">TIM MERAH</span>
+    <span id="qnum">Soal 1/5</span>
+    <div class="timer" id="timerBox">
+      <svg width="46" height="46" viewBox="0 0 44 44">
+        <circle class="tbg" cx="22" cy="22" r="18"></circle>
+        <circle class="tfg" id="tfg" cx="22" cy="22" r="18"></circle>
+      </svg><span id="tsec">45</span>
+    </div>
+  </div>
+  <div class="qbody">
+    <div class="stamp" id="stamp" hidden>BENAR!</div>
+    <p class="qtext" id="qtext"></p>
+    <div class="opts" id="opts"></div>
+    <div id="reveal" hidden>
+      <p class="explain" id="explain"></p>
+      <div class="next-row"><button class="btn btn-go" id="nextBtn">LANJUT ➜</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- layar mulai -->
+<div class="overlay" id="startOv">
+  <div class="ov-card">
+    <div class="kicker">🎪 LOMBA SERU PERSAMAAN KUADRAT 🎪</div>
+    <h2>TARIK TAMBANG <span class="y">KUADRAT</span></h2>
+    <ul class="rules">
+      <li><span class="ic">🔁</span><span>Soal muncul <b>bergantian</b> — tim kiri dulu, lalu tim kanan mendapat soal yang sama. 5 ronde, 5 soal.</span></li>
+      <li><span class="ic">✅</span><span>Jawaban <b>benar</b> menarik tali 1 langkah ke sisi timmu. Jawaban <b>salah</b> (atau waktu 45 detik habis) membuat tali tertarik ke pihak lawan.</span></li>
+      <li><span class="ic">🚩</span><span>Bendera tengah mencapai <b>garis kemenangan (±4 langkah)</b> = tim itu langsung MENANG! Jika 5 ronde selesai, posisi tali terakhir yang menentukan.</span></li>
+    </ul>
+    <div class="team-form">
+      <div class="tf l"><label>🔴 NAMA TIM KIRI</label><input id="inpL" maxlength="14" value="TIM MERAH"></div>
+      <div class="tf r"><label>🔵 NAMA TIM KANAN</label><input id="inpR" maxlength="14" value="TIM BIRU"></div>
+    </div>
+    <button class="btn btn-red big" id="startBtn">🔔 MULAI LOMBA!</button>
+  </div>
+</div>
+
+<!-- layar akhir -->
+<div class="overlay" id="endOv" hidden>
+  <div class="ov-card">
+    <div id="trophy">🏆</div>
+    <div id="endTitle">TIM MERAH MENANG!</div>
+    <p id="endDesc"></p>
+    <div class="stats">
+      <div class="stat l"><h4 id="statNameL">TIM MERAH</h4><div class="n" id="statScoreL">0/5</div></div>
+      <div class="stat r"><h4 id="statNameR">TIM BIRU</h4><div class="n" id="statScoreR">0/5</div></div>
+    </div>
+    <div class="ov-btns">
+      <button class="btn btn-red" id="againBtn">🔁 MAIN LAGI</button>
+      <button class="btn btn-plain" id="changeBtn">⚙️ GANTI TIM</button>
+    </div>
+  </div>
+</div>
+
+<div id="confetti"></div>
+<div class="credit">latihan soal: Persamaan Kuadrat ✏️</div>
+
+<script>
+/* ================= SOAL (sama untuk kedua tim tiap ronde) ================= */
+const QUESTIONS=[
+ {q:"Akar-akar dari persamaan kuadrat x² − 5x + 6 = 0 adalah …",
+  opts:[{t:"x = 2 atau x = 3",ok:true},{t:"x = −2 atau x = −3"},{t:"x = 1 atau x = 6"},{t:"x = −1 atau x = −6"}],
+  why:"x² − 5x + 6 = (x − 2)(x − 3) = 0, sehingga x = 2 atau x = 3."},
+ {q:"Himpunan penyelesaian dari x² + 2x − 8 = 0 adalah …",
+  opts:[{t:"{−4, 2}",ok:true},{t:"{4, 2}"},{t:"{−2, 8}"},{t:"{−8, 1}"}],
+  why:"x² + 2x − 8 = (x + 4)(x − 2) = 0, jadi x = −4 atau x = 2."},
+ {q:"Nilai diskriminan dari persamaan kuadrat 2x² − 3x − 2 = 0 adalah …",
+  opts:[{t:"25",ok:true},{t:"17"},{t:"−7"},{t:"−25"}],
+  why:"D = b² − 4ac = (−3)² − 4(2)(−2) = 9 + 16 = 25."},
+ {q:"Persamaan kuadrat yang akar-akarnya 3 dan −2 adalah …",
+  opts:[{t:"x² − x − 6 = 0",ok:true},{t:"x² + x − 6 = 0"},{t:"x² − x + 6 = 0"},{t:"x² − 5x + 6 = 0"}],
+  why:"x² − (x₁ + x₂)x + x₁·x₂ = x² − (3 + (−2))x + 3(−2) = x² − x − 6 = 0."},
+ {q:"Jika x₁ dan x₂ adalah akar-akar dari 2x² − 6x + 1 = 0, maka nilai x₁ + x₂ adalah …",
+  opts:[{t:"3",ok:true},{t:"−3"},{t:"1/2"},{t:"−1/2"}],
+  why:"Jumlah akar: x₁ + x₂ = −b/a = −(−6)/2 = 3."}
+];
+const TURNS=[]; for(let r=0;r<5;r++){TURNS.push({team:'L',q:r});TURNS.push({team:'R',q:r});}
+const WIN=4, TIME=45;
+
+/* ================= STATE ================= */
+const S={pos:0,idx:0,names:{L:'TIM MERAH',R:'TIM BIRU'},
+  scores:{L:{ok:0,res:[]},R:{ok:0,res:[]}},answered:false,cur:[],timerId:null,timeLeft:TIME,pendingEnd:null};
+
+/* ================= ELEMEN ================= */
+const $=id=>document.getElementById(id);
+const arena=$('arena'),rig=$('rig'),rope=$('rope'),crewL=$('crewL'),crewR=$('crewR'),
+ qcard=$('qcard'),qtext=$('qtext'),optsBox=$('opts'),reveal=$('reveal'),stamp=$('stamp'),
+ explain=$('explain'),nextBtn=$('nextBtn'),qTeamLabel=$('qTeamLabel'),qnum=$('qnum'),
+ timerBox=$('timerBox'),tfg=$('tfg'),tsec=$('tsec'),splashTxt=$('splashTxt'),
+ roundChip=$('roundChip'),chipText=$('chipText'),chipDot=$('chipDot');
+let step=56;
+
+/* ================= DEKORASI ================= */
+(function decorate(){
+ const bun=$('bunting'),cols=['#e2483d','#ffc531','#ffffff','#2f80d0'];
+ for(let i=0;i<28;i++){const f=document.createElement('div');f.className='bflag';
+   f.style.background=cols[i%4];bun.appendChild(f);}
+ const crowd=$('crowd'),cc=['#e2483d','#2f80d0','#ffc531','#7a4fd0','#3fae62','#ff8b3d'];
+ for(let i=0;i<26;i++){const p=document.createElement('div');p.className='spectator';
+   p.style.left=(2+i*3.75)+'%';p.style.background=cc[i%6];
+   p.style.height=(17+Math.random()*9)+'px';p.style.animationDelay=(Math.random()*1.2)+'s';
+   crowd.appendChild(p);}
+ const fl=$('flowers');
+ for(let i=0;i<11;i++){const d=document.createElement('div');d.className='flower';
+   d.style.left=(3+Math.random()*94)+'%';d.style.top=(60+Math.random()*32)+'vh';
+   d.style.animationDelay=(Math.random()*3)+'s';fl.appendChild(d);}
+})();
+
+/* ================= PEMBANGUNAN ARENA ================= */
+function buildCrews(){
+ [crewL,crewR].forEach(c=>{c.innerHTML='';
+   for(let i=0;i<3;i++){const s=document.createElement('span');s.className='tug';
+     s.innerHTML='<svg viewBox="0 0 110 132" aria-hidden="true"><use href="#tugger"/></svg>';
+     c.appendChild(s);}});
+}
+function buildTicks(){
+ const box=$('ticks');box.innerHTML='';
+ for(let o=-4;o<=4;o++){
+   const t=document.createElement('div');t.className='tick'+(o===0?' center':'');
+   t.style.left=`calc(50% + ${o}*var(--step))`;
+   if(o!==0){const s=document.createElement('span');s.textContent=Math.abs(o);t.appendChild(s);}
+   box.appendChild(t);
+ }
+}
+function buildPips(){
+ ['pipsL','pipsR'].forEach(id=>{const p=$(id);p.innerHTML='';
+   for(let i=0;i<5;i++){const s=document.createElement('span');s.className='pip';p.appendChild(s);}});
+}
+function buildMeter(){
+ const mt=$('mtrack');mt.querySelectorAll('.notch').forEach(n=>n.remove());
+ for(let o=-4;o<=4;o++){const n=document.createElement('span');n.className='notch';
+   n.style.left=(50+o*11)+'%';mt.appendChild(n);}
+}
+function layout(){
+ step=Math.max(26,Math.min(58,arena.clientWidth*0.052));
+ document.documentElement.style.setProperty('--step',step+'px');
+ applyPos(false);
+}
+
+/* ================= POSISI TALI ================= */
+function applyPos(anim=true){
+ const els=[rig,crewL,crewR];
+ if(!anim){arena.classList.add('noanim');}
+ rig.style.transform=`translateX(${S.pos*step}px)`;
+ const pull=S.pos*step*0.45;
+ crewL.style.transform=`translateX(${pull}px)`;
+ crewR.style.transform=`translateX(${pull}px)`;
+ if(!anim){void arena.offsetWidth;arena.classList.remove('noanim');}
+ $('mmark').style.left=(50+S.pos*11)+'%';
+ crewL.classList.toggle('leading',S.pos<0);crewL.classList.toggle('strain',S.pos>0);
+ crewR.classList.toggle('leading',S.pos>0);crewR.classList.toggle('strain',S.pos<0);
+ $('meterText').textContent=S.pos===0?'Tali tepat di tengah ⚖️'
+   :`Tali condong ${Math.abs(S.pos)} langkah ke ${S.pos<0?S.names.L:S.names.R}!`;
+}
+
+/* ================= SUARA ================= */
+let AC=null,soundOn=true;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC;}
+function tone(f,d,type='square',v=.15,delay=0){
+ if(!soundOn)return;
+ try{const c=ac(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+  o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.012);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.05);}catch(e){}
+}
+const sfx={
+ correct(){tone(659,.12,'triangle',.2);tone(784,.12,'triangle',.2,.11);tone(1047,.22,'triangle',.22,.22);},
+ wrong(){tone(196,.3,'sawtooth',.14);tone(147,.35,'sawtooth',.12,.13);},
+ tick(){tone(950,.05,'square',.05);},
+ whistle(){tone(2100,.15,'square',.11);tone(2100,.32,'square',.11,.2);},
+ win(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.2,i*.13));tone(1319,.55,'triangle',.18,.58);}
+};
+$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';});
+
+/* ================= UTIL ================= */
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function splash(html,color,ms=1000){
+ splashTxt.innerHTML=html;splashTxt.style.color=color;
+ splashTxt.classList.remove('show');void splashTxt.offsetWidth;splashTxt.classList.add('show');
+ setTimeout(()=>splashTxt.classList.remove('show'),ms);
+}
+function confetti(n=150){
+ const c=$('confetti'),cols=['#e2483d','#2f80d0','#ffc531','#ffffff','#7a4fd0','#3fae62'];
+ for(let i=0;i<n;i++){const s=document.createElement('span');
+   s.style.left=Math.random()*100+'%';s.style.background=cols[i%cols.length];
+   s.style.width=(7+Math.random()*7)+'px';s.style.height=(10+Math.random()*8)+'px';
+   s.style.animationDuration=(2.3+Math.random()*2)+'s';s.style.animationDelay=(Math.random()*.8)+'s';
+   s.addEventListener('animationend',()=>s.remove());c.appendChild(s);}
+}
+function crowdReact(){const cr=$('crowd');cr.classList.add('excited');setTimeout(()=>cr.classList.remove('excited'),1400);}
+
+/* ================= ALUR PERMAINAN ================= */
+function setNames(){
+ $('nameL').textContent=S.names.L;$('nameR').textContent=S.names.R;
+ $('mLabL').textContent='◀ '+S.names.L;$('mLabR').textContent=S.names.R+' ▶';
+}
+function showTurn(){
+ const turn=TURNS[S.idx],t=turn.team,q=QUESTIONS[turn.q];
+ S.answered=false;S.cur=shuffle(q.opts);
+ arena.classList.toggle('turn-L',t==='L');arena.classList.toggle('turn-R',t==='R');
+ chipDot.className='dot team-'+t;
+ chipText.innerHTML=`Ronde ${Math.floor(S.idx/2)+1}/5 — Giliran <b>${S.names[t]}</b>`;
+ qcard.className='qcard open team-'+t;
+ qTeamLabel.textContent=S.names[t];
+ qnum.textContent=`Soal ${turn.q+1}/5`;
+ qtext.textContent=q.q;
+ stamp.hidden=true;reveal.hidden=true;
+ optsBox.innerHTML='';
+ S.cur.forEach((o,i)=>{
+   const b=document.createElement('button');b.className='opt';
+   b.innerHTML=`<span class="key">${'ABCD'[i]}</span><span>${o.t}</span>`;
+   b.addEventListener('click',()=>select(i));optsBox.appendChild(b);
+ });
+ startTimer();
+}
+function startTimer(){
+ stopTimer();S.timeLeft=TIME;paintTimer();
+ S.timerId=setInterval(()=>{
+   S.timeLeft-=.1;
+   if(S.timeLeft<=5.05&&S.timeLeft>0&&Math.round(S.timeLeft*10)%10===0)sfx.tick();
+   if(S.timeLeft<=0){stopTimer();S.timeLeft=0;paintTimer();resolve(null);}
+   else paintTimer();
+ },100);
+}
+function stopTimer(){if(S.timerId){clearInterval(S.timerId);S.timerId=null;}}
+function paintTimer(){
+ tfg.style.strokeDashoffset=113.1*(1-S.timeLeft/TIME);
+ tsec.textContent=Math.ceil(S.timeLeft);
+ timerBox.classList.toggle('low',S.timeLeft<=10);
+}
+function updatePip(team){
+ const el=team==='L'?$('pipsL'):$('pipsR'),arr=S.scores[team].res;
+ [...el.children].forEach((p,i)=>{
+   if(arr[i]===undefined)return;
+   p.classList.add(arr[i]?'ok':'no');p.textContent=arr[i]?'✓':'✗';});
+}
+function select(i){if(!S.answered)resolve(i);}
+function resolve(i){
+ if(S.answered)return;S.answered=true;stopTimer();
+ const turn=TURNS[S.idx],t=turn.team;
+ const ok=i!==null&&S.cur[i].ok;
+ [...optsBox.children].forEach((b,j)=>{
+   b.disabled=true;
+   if(S.cur[j].ok)b.classList.add('good');
+   else if(j===i)b.classList.add('bad');
+   else b.classList.add('off');
+ });
+ const delta=ok?(t==='L'?-1:1):(t==='L'?1:-1);
+ S.pos+=delta;S.scores[t].res.push(ok);if(ok)S.scores[t].ok++;
+ updatePip(t);
+ rope.classList.remove('yank');void rope.offsetWidth;rope.classList.add('yank');
+ applyPos(true);crowdReact();
+ stamp.textContent=i===null?'⏰ WAKTU HABIS!':ok?'✅ BENAR!':'❌ SALAH!';
+ stamp.className='stamp '+(ok?'ok':'no');stamp.hidden=false;
+ stamp.title=ok?'Tali tertarik ke sisi timmu!':'Tali tertarik ke sisi lawan!';
+ explain.innerHTML='💡 <b>Pembahasan:</b> '+QUESTIONS[turn.q].why;
+ S.pendingEnd=Math.abs(S.pos)>=WIN?'line':(S.idx===TURNS.length-1?'final':null);
+ nextBtn.textContent=S.pendingEnd?'LIHAT HASIL 🏁':'LANJUT ➜';
+ reveal.hidden=false;
+ const crew=t==='L'?crewL:crewR,other=t==='L'?crewR:crewL;
+ crew.classList.add(ok?'cheer':'slip');other.classList.add(ok?'slip':'cheer');
+ setTimeout(()=>{crew.classList.remove('cheer','slip');other.classList.remove('cheer','slip');},1200);
+ ok?sfx.correct():sfx.wrong();
+}
+nextBtn.addEventListener('click',()=>{
+ qcard.classList.remove('open');
+ if(S.pendingEnd){setTimeout(endGame,650);return;}
+ S.idx++;
+ const t=TURNS[S.idx].team;
+ splash(`GILIRAN ${S.names[t]}!`,t==='L'?'var(--red)':'var(--blue)');
+ setTimeout(showTurn,820);
+});
+function endGame(){
+ arena.classList.remove('turn-L','turn-R');
+ let winner=null,desc='';
+ if(S.pos<=-WIN)winner='L';else if(S.pos>=WIN)winner='R';
+ else if(S.pos<0)winner='L';else if(S.pos>0)winner='R';
+ if(winner){
+   const byLine=S.pendingEnd==='line';
+   desc=byLine?'Tali berhasil ditarik melewati garis kemenangan! 🎉'
+        :`Setelah 5 ronde, tali berakhir ${Math.abs(S.pos)} langkah ke sisi pemenang!`;
+   $('trophy').textContent='🏆';
+   $('endTitle').textContent=S.names[winner]+' MENANG!';
+   $('endTitle').style.color=winner==='L'?'var(--red-d)':'var(--blue-d)';
+   sfx.win();confetti(170);
+ }else{
+   $('trophy').textContent='🤝';
+   $('endTitle').textContent='SERI!';$('endTitle').style.color='var(--ink)';
+   desc='Tali berhenti tepat di tengah. Sama-sama kuat!';
+ }
+ $('endDesc').textContent=desc;
+ $('statNameL').textContent=S.names.L;$('statNameR').textContent=S.names.R;
+ $('statScoreL').textContent=`benar ${S.scores.L.ok}/5`;
+ $('statScoreR').textContent=`benar ${S.scores.R.ok}/5`;
+ chipText.textContent='🏁 Lomba selesai!';
+ $('endOv').hidden=false;
+}
+function resetState(){
+ S.pos=0;S.idx=0;S.pendingEnd=null;S.answered=false;
+ S.scores={L:{ok:0,res:[]},R:{ok:0,res:[]}};
+ buildPips();applyPos(false);
+ qcard.classList.remove('open');arena.classList.remove('turn-L','turn-R');
+}
+function startGame(){
+ resetState();
+ S.names.L=($('inpL').value.trim()||'TIM MERAH').toUpperCase();
+ S.names.R=($('inpR').value.trim()||'TIM BIRU').toUpperCase();
+ setNames();
+ $('startOv').style.display='none';$('endOv').hidden=true;
+ chipText.textContent='Bersiap…';
+ sfx.whistle();
+ splash('🎺 LOMBA DIMULAI!','#fff',1100);
+ setTimeout(showTurn,1000);
+}
+$('startBtn').addEventListener('click',startGame);
+$('againBtn').addEventListener('click',()=>{
+ $('endOv').hidden=true;resetState();sfx.whistle();
+ splash('🔁 RONDE BARU!','#fff',900);setTimeout(showTurn,850);
+});
+$('changeBtn').addEventListener('click',()=>{
+ $('endOv').hidden=true;resetState();$('startOv').style.display='grid';
+});
+
+/* keyboard: A–D / 1–4 untuk menjawab, Enter untuk lanjut */
+document.addEventListener('keydown',e=>{
+ if(!qcard.classList.contains('open'))return;
+ if(!S.answered){
+   let i=-1;const k=e.key.toLowerCase();
+   if(['1','2','3','4'].includes(k))i=+k-1;
+   else if(['a','b','c','d'].includes(k))i='abcd'.indexOf(k);
+   if(i>-1&&i<optsBox.children.length){optsBox.children[i].click();}
+ }else if(e.key==='Enter'&&!reveal.hidden){nextBtn.click();}
+});
+
+/* ================= INIT ================= */
+window.addEventListener('resize',layout);
+buildCrews();buildTicks();buildPips();buildMeter();layout();applyPos(false);
+</script>
+</body>
+</html>
