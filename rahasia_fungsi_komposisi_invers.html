@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYBER ESCAPE: Rahasia Fungsi Komposisi & Invers</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Google Fonts: Orbitron & Rajdhani -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- KaTeX for Math Expressions -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif'],
+            rajdhani: ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            cyber: {
+              bg: '#070b12',
+              card: '#0f172a',
+              cyan: '#00f3ff',
+              amber: '#ffb700',
+              rose: '#ff0055',
+              purple: '#b026ff',
+            }
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.4)',
+            'neon-amber': '0 0 15px rgba(255, 183, 0, 0.4)',
+            'neon-rose': '0 0 15px rgba(255, 0, 85, 0.4)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070b12;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.08) 0%, transparent 60%),
+        linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    /* Custom Scanlines Effect */
+    .scanline {
+      position: relative;
+      overflow: hidden;
+    }
+    .scanline::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* Pulsing & Glow Effects */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1329;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00f3ff;
+      border-radius: 3px;
+    }
+
+    /* Keypad Button Active Effect */
+    .key-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col scanline select-none">
+
+  <!-- TOP HEADER & MASTER LOCK STATUS -->
+  <header class="w-full bg-slate-900/90 border-b border-cyan-500/30 backdrop-blur-md sticky top-0 z-30 px-4 py-3 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Game Branding -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-400 text-xl shadow-neon-cyan">
+          <i class="fa-solid fa-terminal"></i>
+        </div>
+        <div>
+          <h1 class="font-orbitron font-extrabold text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400 tracking-wider">
+            CYBER ESCAPE
+          </h1>
+          <p class="text-xs text-slate-400 tracking-widest uppercase">Rahasia Fungsi Komposisi & Invers</p>
+        </div>
+      </div>
+
+      <!-- Master Lock 5-Digit Display -->
+      <div class="bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-2 flex items-center gap-3 shadow-inner">
+        <span class="text-xs text-cyan-400 font-orbitron font-semibold uppercase tracking-wider hidden sm:inline">
+          <i class="fa-solid fa-lock text-amber-400 mr-1"></i> MASTER LOCK:
+        </span>
+        <div id="master-lock-container" class="flex gap-2">
+          <!-- Digits rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Controls & Status (Timer, Score, Sound) -->
+      <div class="flex items-center gap-4">
+        <!-- Timer -->
+        <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+          <i class="fa-solid fa-stopwatch text-amber-400 text-lg"></i>
+          <div>
+            <div class="text-[10px] text-slate-400 font-orbitron uppercase leading-none">WAKTU</div>
+            <div id="timer-display" class="font-orbitron font-bold text-amber-400 text-base leading-none">20:00</div>
+          </div>
+        </div>
+
+        <!-- Score -->
+        <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+          <i class="fa-solid fa-trophy text-cyan-400 text-lg"></i>
+          <div>
+            <div class="text-[10px] text-slate-400 font-orbitron uppercase leading-none">SKOR</div>
+            <div id="score-display" class="font-orbitron font-bold text-cyan-400 text-base leading-none">5000</div>
+          </div>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="sound-btn" title="Toggle Sound" class="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-cyan-400 transition">
+          <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Help / Briefing -->
+        <button id="help-btn" title="Panduan Misi" class="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-slate-300 hover:text-cyan-400 transition">
+          <i class="fa-solid fa-circle-info"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN GAME CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- LEFT PANEL: ROOM MAP / SELECTOR (3 cols on lg) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 backdrop-blur-md shadow-xl flex flex-col gap-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h2 class="font-orbitron text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot"></i> Peta Ruangan Cyber
+          </h2>
+          <span class="text-xs text-slate-400 font-mono" id="progress-indicator">0 / 5 Terbuka</span>
+        </div>
+
+        <!-- Room List Buttons -->
+        <div id="room-list" class="space-y-2.5">
+          <!-- Dynamic Room Items -->
+        </div>
+
+        <!-- Master Door Access Button -->
+        <button id="master-door-nav-btn" class="w-full mt-2 py-3 px-4 rounded-xl font-orbitron font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-door-closed text-amber-400"></i> PINTU UTAMA ESCAPE
+          </span>
+          <i class="fa-solid fa-key text-amber-400"></i>
+        </button>
+      </div>
+
+      <!-- SYSTEM CONSOLE / LOGS -->
+      <div class="bg-slate-950/90 border border-cyan-500/20 rounded-2xl p-4 font-mono text-xs text-slate-400 flex flex-col gap-2 shadow-inner">
+        <div class="text-cyan-400 font-bold font-orbitron text-[11px] uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> LOG SISTEM ESCAPE
+        </div>
+        <div id="system-logs" class="h-28 overflow-y-auto space-y-1.5 pr-1 text-[11px]">
+          <p class="text-cyan-300">[SYSTEM]: Sinyal darurat aktif. Selamat datang di Cyber Escape.</p>
+          <p class="text-slate-500">[SYSTEM]: Selesaikan 5 tantangan untuk memperoleh 5 digit kode rahasia.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: ACTIVE CHALLENGE OR MASTER KEYPAD (8 cols on lg) -->
+    <section class="lg:col-span-8 flex flex-col">
+      <div id="challenge-card" class="bg-slate-900/80 border border-cyan-500/30 rounded-2xl p-5 md:p-7 backdrop-blur-md shadow-2xl flex-1 flex flex-col justify-between">
+        <!-- Dynamic Challenge Content Rendered Here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: PEMBAHASAN MATEMATIKA DETAIL -->
+  <div id="explanation-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-cyan-500/50 rounded-2xl max-w-2xl w-full p-6 md:p-8 shadow-2xl relative flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div>
+            <h3 class="font-orbitron font-bold text-lg text-emerald-400 uppercase tracking-wide">AKSES DITERIMA!</h3>
+            <p class="text-xs text-slate-400" id="explanation-subtitle">Digit Kode Diperoleh</p>
+          </div>
+        </div>
+        <div id="unlocked-digit-badge" class="bg-amber-500/20 border border-amber-400 text-amber-300 px-3 py-1 rounded-lg font-orbitron font-bold text-sm">
+          DIGIT KODE: ?
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h4 class="font-orbitron text-sm font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark"></i> PEMBAHASAN MATEMATIKA DETAIL
+        </h4>
+        <div id="explanation-content" class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-slate-200 text-sm leading-relaxed space-y-3">
+          <!-- Content injected dynamically -->
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button id="close-explanation-btn" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-orbitron font-bold text-xs uppercase px-6 py-3 rounded-xl transition shadow-neon-cyan flex items-center gap-2">
+          <span>LANJUT KE RUANGAN NEXT</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: GAME BRIEFING / TUTORIAL -->
+  <div id="briefing-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl max-w-xl w-full p-6 md:p-8 shadow-2xl space-y-5">
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-400 text-3xl shadow-neon-cyan pulse-glow">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <h2 class="font-orbitron font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400">
+          INSTRUKSI ESCAPE
+        </h2>
+        <p class="text-xs text-slate-400 uppercase tracking-wider font-orbitron">Misi Kelas XI: Fungsi Komposisi & Invers</p>
+      </div>
+
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 text-sm text-slate-300 space-y-3">
+        <p class="leading-relaxed">
+          Sistem pertahanan siber terisolasi. Anda terjebak di dalam lab penelitian dan harus memecahkan 5 teka-teki matematika secara berurutan untuk mendapatkan <strong class="text-amber-400">5-digit kode sakelar utama</strong>.
+        </p>
+        <ul class="space-y-2 text-xs text-slate-400">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-shield-halved text-cyan-400 mt-0.5"></i>
+            <span>Setiap jawaban benar akan membuka <strong>1 Digit Kode Pintu Utama</strong> & memberikan pembahasan matematika mendalam.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-lightbulb text-amber-400 mt-0.5"></i>
+            <span>Tersedia <strong>Petunjuk Bertahap (3 Hint)</strong> jika menemui jalan buntu (mengurangi skor).</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-clock text-rose-400 mt-0.5"></i>
+            <span>Batas waktu total: <strong>20 Menit</strong>. Jawaban salah memberikan penalti <strong>-100 Poin</strong>.</span>
+          </li>
+        </ul>
+      </div>
+
+      <button id="start-game-btn" class="w-full bg-gradient-to-r from-cyan-500 via-teal-400 to-amber-400 text-slate-950 font-orbitron font-black text-sm uppercase py-3.5 rounded-xl transition shadow-neon-cyan hover:brightness-110 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-power-off"></i>
+        <span>MULAI SIMULASI ESCAPE</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: VICTORY / ESCAPE SUCCESS -->
+  <div id="victory-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-amber-500/60 rounded-2xl max-w-lg w-full p-6 md:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+      <!-- Glow Effect -->
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-400 text-4xl shadow-neon-amber animate-bounce">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+
+      <div class="space-y-1">
+        <h2 class="font-orbitron font-black text-2xl text-amber-300 uppercase tracking-widest">
+          SYSTEM UNLOCKED!
+        </h2>
+        <p class="text-xs text-emerald-400 font-orbitron uppercase tracking-wider">BERHASIL MELARIKAN DIRI DARI LABORATURIUM SIBER</p>
+      </div>
+
+      <!-- Performance Summary -->
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-left space-y-3 font-mono text-xs">
+        <div class="flex justify-between border-b border-slate-800 pb-2">
+          <span class="text-slate-400">SKOR AKHIR:</span>
+          <span id="final-score" class="text-cyan-400 font-bold text-sm">0</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-800 pb-2">
+          <span class="text-slate-400">WAKTU TEMPUH:</span>
+          <span id="final-time" class="text-amber-400 font-bold">00:00</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-800 pb-2">
+          <span class="text-slate-400">HINT DIGUNAKAN:</span>
+          <span id="final-hints" class="text-slate-300 font-bold">0</span>
+        </div>
+        <div class="flex justify-between items-center pt-1">
+          <span class="text-slate-400">PREDIKAT MATEMATIKA:</span>
+          <span id="final-badge" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded font-orbitron font-bold text-[11px]">CYBER MASTER</span>
+        </div>
+      </div>
+
+      <button id="restart-game-btn" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-orbitron font-black text-xs uppercase py-3.5 rounded-xl shadow-neon-amber hover:brightness-110 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>MAIN LAGI / RESET SIMULASI</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 4: GAME OVER / LOCKDOWN -->
+  <div id="gameover-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-rose-500/60 rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl text-center space-y-5">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-500/20 border border-rose-500 flex items-center justify-center text-rose-500 text-3xl shadow-neon-rose">
+        <i class="fa-solid fa-skull-crossbones"></i>
+      </div>
+      <div class="space-y-1">
+        <h2 class="font-orbitron font-black text-2xl text-rose-500 uppercase tracking-widest">
+          LOCKDOWN AKTIFF!
+        </h2>
+        <p class="text-xs text-slate-400 font-orbitron">WAKTU ATAU SKOR TELAH HABIS</p>
+      </div>
+      <p class="text-xs text-slate-300 bg-slate-950/80 p-3 rounded-lg border border-slate-800 leading-relaxed">
+        Sistem mengunci otomatis seluruh akses laboratorium. Silakan tingkatkan pemahaman fungsi komposisi & invers lalu coba lagi!
+      </p>
+      <button id="retry-game-btn" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-orbitron font-bold text-xs uppercase py-3 rounded-xl transition shadow-neon-rose flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>COBA LAGI</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       1. DATA SOAL & MATERI MATEMATIKA KELAS XI (FUNGSI KOMPOSISI & INVERS)
+       ========================================================================== */
+    const LEVELS = [
+      {
+        id: 1,
+        title: "LEVEL 01: SINKRONISASI SINYAL FUNGSI",
+        difficulty: "MUDAH",
+        diffClass: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+        roomName: "Ruang Kontrol Sinyal Alpha",
+        story: "Anda berada di Ruang Kontrol Sinyal Alpha. Layar terminal menampilkan sinyal input terisolasi. Komposisikan dua fungsi transmisi untuk menemukan frekuensi pembuka digit pertama.",
+        question: "Diketahui fungsi $f(x) = 3x - 4$ dan $g(x) = x + 2$.\nTentukan nilai dari fungsi komposisi $(f \\circ g)(1)$ !",
+        answer: 5,
+        codeDigit: 5,
+        hints: [
+          { level: 1, text: "Konsep Utama: $(f \\circ g)(1)$ berarti hitung terlebih dahulu nilai $g(1)$, kemudian hasilnya dimasukkan ke dalam fungsi $f(x)$.", cost: 50 },
+          { level: 2, text: "Langkah 1: Substitusikan $x = 1$ ke fungsi $g(x) = x + 2$ sehingga diperoleh $g(1) = 1 + 2 = 3$.", cost: 100 },
+          { level: 3, text: "Langkah 2: Masukkan hasil $g(1) = 3$ ke fungsi $f(x) = 3x - 4$. Hitung $f(3) = 3(3) - 4$.", cost: 150 }
+        ],
+        explanation: `
+          <div class="space-y-3">
+            <p class="font-semibold text-cyan-300">Langkah Pengerjaan Rinci:</p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300">
+              <li><strong>Pahami Definisi Fungsi Komposisi:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">(f \\circ g)(1) = f(g(1))</span>
+              </li>
+              <li><strong>Evaluasi Fungsi Dalam $g(1)$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">g(x) = x + 2 \\implies g(1) = 1 + 2 = 3</span>
+              </li>
+              <li><strong>Substitusikan Nilai $g(1)$ ke Fungsi Luar $f(x)$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">f(g(1)) = f(3) = 3(3) - 4 = 9 - 4 = 5</span>
+              </li>
+            </ol>
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs mt-2">
+              <i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Akhir = 5.</strong> Digit Pertama Pintu Utama = <strong>5</strong>.
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 2,
+        title: "LEVEL 02: KALIBRASI REAKTOR NUCLEUS",
+        difficulty: "SEDANG",
+        diffClass: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+        roomName: "Sektor Reaktor Daya Beta",
+        story: "Reaktor daya membutuhkan kalibrasi variabel input $x$ agar tingkat output energi berada tepat pada skala ambang 26 unit. Susun komposisi dua fungsi untuk menghitung variabel $x$.",
+        question: "Diketahui $f(x) = 3x + 2$ dan $g(x) = x^2 - 1$.\nJika nilai positif $x$ memenuhi $(f \\circ g)(x) = 26$, berapakah nilai $x$ tersebut?",
+        answer: 3,
+        codeDigit: 3,
+        hints: [
+          { level: 1, text: "Konsep Utama: Tentukan fungsi komposisi $(f \\circ g)(x) = f(g(x)) = f(x^2 - 1)$ terlebih dahulu.", cost: 50 },
+          { level: 2, text: "Substitusikan $g(x)$ ke $f(x)$: $f(x^2 - 1) = 3(x^2 - 1) + 2 = 3x^2 - 3 + 2 = 3x^2 - 1$.", cost: 100 },
+          { level: 3, text: "Sama dengankan dengan 26: $3x^2 - 1 = 26 \\implies 3x^2 = 27 \\implies x^2 = 9$. Cari nilai $x$ positif.", cost: 150 }
+        ],
+        explanation: `
+          <div class="space-y-3">
+            <p class="font-semibold text-cyan-300">Langkah Pengerjaan Rinci:</p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300">
+              <li><strong>Formulasikan $(f \\circ g)(x)$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">(f \\circ g)(x) = f(g(x)) = 3(x^2 - 1) + 2 = 3x^2 - 3 + 2 = 3x^2 - 1</span>
+              </li>
+              <li><strong>Selesaikan Persamaan untuk $(f \\circ g)(x) = 26$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">3x^2 - 1 = 26 \\implies 3x^2 = 27 \\implies x^2 = 9</span>
+              </li>
+              <li><strong>Tentukan Nilai $x$ Positif:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">x = \\sqrt{9} = 3 \\quad (karena \\, x > 0)</span>
+              </li>
+            </ol>
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs mt-2">
+              <i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Akhir = 3.</strong> Digit Kedua Pintu Utama = <strong>3</strong>.
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 3,
+        title: "LEVEL 03: REVERSI SISTEM NAVIGASI",
+        difficulty: "SEDANG - TINGGI",
+        diffClass: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+        roomName: "Lab Sistem Navigasi Kuantum",
+        story: "Sistem navigasi terkunci akibat manipulasi fungsi rasional. Lakukan pembalikan fungsi (invers) pada output nilai 4 untuk memulihkan alur sinyal.",
+        question: "Diketahui fungsi rasional $f(x) = \\frac{3x + 2}{x - 1}$ untuk $x \\neq 1$.\nTentukan nilai dari fungsi invers $f^{-1}(4)$ !",
+        answer: 6,
+        codeDigit: 6,
+        hints: [
+          { level: 1, text: "Konsep Invers: Jika $f^{-1}(4) = k$, maka berlaku sifat dasar fungsi invers $f(k) = 4$.", cost: 50 },
+          { level: 2, text: "Substitusikan $k$ ke fungsi $f(x)$: $\\frac{3k + 2}{k - 1} = 4$.", cost: 100 },
+          { level: 3, text: "Kalikan silang: $3k + 2 = 4(k - 1) \\implies 3k + 2 = 4k - 4 \\implies 4k - 3k = 2 + 4$.", cost: 150 }
+        ],
+        explanation: `
+          <div class="space-y-3">
+            <p class="font-semibold text-cyan-300">Langkah Pengerjaan Rinci:</p>
+            <p class="text-xs text-slate-300"><strong>Metode 1: Menggunakan Definisi Invers $f^{-1}(b) = a \\iff f(a) = b$</strong></p>
+            <ol class="list-decimal list-inside space-y-1.5 text-slate-300 text-xs">
+              <li>Misalkan $f^{-1}(4) = k \\implies f(k) = 4$.</li>
+              <li>$\\frac{3k + 2}{k - 1} = 4 \\implies 3k + 2 = 4(k - 1)$</li>
+              <li>$3k + 2 = 4k - 4 \\implies 4k - 3k = 2 + 4 \\implies k = 6$.</li>
+            </ol>
+            <p class="text-xs text-slate-300 mt-2"><strong>Metode 2: Rumus Cepat Invers Fungsi Rasional $f(x) = \\frac{ax+b}{cx+d} \\implies f^{-1}(x) = \\frac{-dx+b}{cx-a}$</strong></p>
+            <div class="p-2 bg-slate-900 rounded text-xs font-mono text-cyan-300">
+              f(x) = \\frac{3x + 2}{1x - 1} \\implies f^{-1}(x) = \\frac{1x + 2}{1x - 3} = \\frac{x + 2}{x - 3}<br>
+              f^{-1}(4) = \\frac{4 + 2}{4 - 3} = \\frac{6}{1} = 6
+            </div>
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs mt-2">
+              <i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Akhir = 6.</strong> Digit Ketiga Pintu Utama = <strong>6</strong>.
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 4,
+        title: "LEVEL 04: OPTIMALISASI PRODUKSI INDUSTRI",
+        difficulty: "HOTS KONTEKSTUAL I",
+        difficultyColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+        diffClass: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+        roomName: "Pusat Pemrosesan Otomatis",
+        story: "Sebuah pabrik daur ulang plastik beroperasi menggunakan dua mesin bertahap. Hitung jumlah unit produk akhir yang dihasilkan dari bahan baku awal $x = 3$ ton.",
+        question: "Mesin I mengubah bahan baku $x$ (ton) menjadi pelet $m$ dengan rumus $m = f(x) = 2x - 1$.\nMesin II mengubah pelet $m$ menjadi produk akhir $y$ unit dengan rumus $y = g(m) = 3m - 11$.\nJika bahan baku awal $x = 3$ ton, berapakah jumlah unit produk akhir $y$?",
+        answer: 4,
+        codeDigit: 4,
+        hints: [
+          { level: 1, text: "Konsep Pemodelan: Masalahkan ini membentuk fungsi komposisi $(g \\circ f)(x) = g(f(x))$.", cost: 50 },
+          { level: 2, text: "Hitung output Mesin I terlebih dahulu untuk $x = 3$: $m = f(3) = 2(3) - 1 = 6 - 1 = 5$ ton pelet.", cost: 100 },
+          { level: 3, text: "Masukkan nilai pelet $m = 5$ ke Mesin II: $y = g(5) = 3(5) - 11 = 15 - 11$.", cost: 150 }
+        ],
+        explanation: `
+          <div class="space-y-3">
+            <p class="font-semibold text-cyan-300">Langkah Pengerjaan Rinci (HOTS Kontekstual):</p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300">
+              <li><strong>Tahap 1 (Pemrosesan Mesin I):</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">m = f(x) = 2x - 1</span><br>
+                  Untuk $x = 3$ ton bahan baku:<br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">m = f(3) = 2(3) - 1 = 6 - 1 = 5 \\text{ ton pelet}</span>
+              </li>
+              <li><strong>Tahap 2 (Pemrosesan Mesin II):</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">y = g(m) = 3m - 11</span><br>
+                  Substitusikan $m = 5$ ton pelet:<br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">y = g(5) = 3(5) - 11 = 15 - 11 = 4 \\text{ unit produk}</span>
+              </li>
+            </ol>
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs mt-2">
+              <i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Akhir = 4.</strong> Digit Keempat Pintu Utama = <strong>4</strong>.
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 5,
+        title: "LEVEL 05: DEKRIPSI KRIPTOGRAFI SIBER",
+        difficulty: "HOTS KONTEKSTUAL II",
+        diffClass: "text-rose-400 bg-rose-500/10 border-rose-500/30",
+        roomName: "Core Server Terpusat & Sakelar Utama",
+        story: "Sakelar pintu darurat terisolasi di pusat mainframe. Sistem enkripsi memiliki fungsi gabungan terdeteksi. Temukan sinyal dekripsi awal $x = (f \\circ g)^{-1}(5)$ untuk melepaskan pengunci.",
+        question: "Fungsi enkripsi gabungan data didefinisikan sebagai $(f \\circ g)(x) = \\frac{4x + 2}{x - 1}$.\nUntuk membuka sakelar pintu darurat, sistem membutuhkan sinyal dekripsi awal $x = (f \\circ g)^{-1}(5)$.\nTentukan nilai sinyal dekripsi $x$ tersebut!",
+        answer: 7,
+        codeDigit: 7,
+        hints: [
+          { level: 1, text: "Konsep Dekripsi: Misalkan $h(x) = (f \\circ g)(x)$. Mencari $x = h^{-1}(5)$ ekuivalen dengan memecahkan $h(x) = 5$.", cost: 50 },
+          { level: 2, text: "Sama dengankan $\\frac{4x + 2}{x - 1} = 5$.", cost: 100 },
+          { level: 3, text: "Kalikan silang: $4x + 2 = 5(x - 1) \\implies 4x + 2 = 5x - 5 \\implies 5x - 4x = 2 + 5$.", cost: 150 }
+        ],
+        explanation: `
+          <div class="space-y-3">
+            <p class="font-semibold text-cyan-300">Langkah Pengerjaan Rinci (HOTS Kriptografi):</p>
+            <p class="text-xs text-slate-300">Misalkan fungsi enkripsi gabungan adalah $h(x) = (f \\circ g)(x) = \\frac{4x + 2}{x - 1}$.</p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300">
+              <li><strong>Gunakan Hubungan Invers $h^{-1}(5) = x \\iff h(x) = 5$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">\\frac{4x + 2}{x - 1} = 5</span>
+              </li>
+              <li><strong>Kalikan Silang Persamaan:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">4x + 2 = 5(x - 1) \\implies 4x + 2 = 5x - 5</span>
+              </li>
+              <li><strong>Isolasi Variabel $x$:</strong><br>
+                  <span class="font-mono bg-slate-900 px-2 py-0.5 rounded text-cyan-400">2 + 5 = 5x - 4x \\implies x = 7</span>
+              </li>
+            </ol>
+            <div class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs mt-2">
+              <i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Akhir = 7.</strong> Digit Kelima Pintu Utama = <strong>7</strong>.
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    const MASTER_CODE = "53647"; // Secret Master Escape Code
+
+    /* ==========================================================================
+       2. AUDIO SYNTHESIZER (WEB AUDIO API)
+       ========================================================================== */
+    class SoundController {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.1) {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      }
+
+      playClick() { this.playTone(700, 'sine', 0.05, 0.08); }
+      
+      playCorrect() {
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.15, 0.12), i * 80);
+        });
+      }
+
+      playWrong() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(70, this.ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.3);
+        } catch(e) {}
+      }
+
+      playUnlock() {
+        const notes = [440, 554.37, 659.25, 880, 1108.73];
+        notes.forEach((freq, i) => {
+          setTimeout(() => this.playTone(freq, 'sine', 0.2, 0.15), i * 60);
+        });
+      }
+
+      playVictory() {
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+        notes.forEach((freq, i) => {
+          setTimeout(() => this.playTone(freq, 'square', 0.25, 0.1), i * 110);
+        });
+      }
+    }
+
+    const sound = new SoundController();
+
+    /* ==========================================================================
+       3. GAME STATE MANAGEMENT
+       ========================================================================== */
+    const gameState = {
+      activeLevelId: 1, // 1-5 or 6 (Keypad)
+      unlockedLevels: [1],
+      completedLevels: {}, // { levelId: { answer: number, time: number } }
+      unlockedCodeDigits: [false, false, false, false, false],
+      hintsUsed: { 1: [], 2: [], 3: [], 4: [], 5: [] }, // Level ID -> array of hint levels used
+      score: 5000,
+      timeLeft: 1200, // 20:00 minutes
+      timerInterval: null,
+      keypadInput: "",
+      gameFinished: false,
+      totalHintsCount: 0
+    };
+
+    /* ==========================================================================
+       4. INITIALIZATION & UI RENDERERS
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", () => {
+      initEventListeners();
+      renderMasterLockHeader();
+      renderRoomList();
+      renderActiveContent();
+    });
+
+    function initEventListeners() {
+      // Sound Toggle
+      document.getElementById('sound-btn').addEventListener('click', () => {
+        sound.enabled = !sound.enabled;
+        const icon = document.getElementById('sound-icon');
+        if (sound.enabled) {
+          icon.className = 'fa-solid fa-volume-high';
+          sound.playClick();
+        } else {
+          icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+        }
+      });
+
+      // Briefing / Start Game
+      document.getElementById('help-btn').addEventListener('click', () => {
+        sound.playClick();
+        document.getElementById('briefing-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('start-game-btn').addEventListener('click', () => {
+        sound.playClick();
+        document.getElementById('briefing-modal').classList.add('hidden');
+        if (!gameState.timerInterval && !gameState.gameFinished) {
+          startTimer();
+        }
+      });
+
+      // Master Door Nav Button
+      document.getElementById('master-door-nav-btn').addEventListener('click', () => {
+        sound.playClick();
+        gameState.activeLevelId = 6; // Keypad screen
+        renderRoomList();
+        renderActiveContent();
+      });
+
+      // Explanation Modal Close
+      document.getElementById('close-explanation-btn').addEventListener('click', () => {
+        sound.playClick();
+        document.getElementById('explanation-modal').classList.add('hidden');
+        
+        // Auto advance to next level or master door
+        if (gameState.activeLevelId < 5) {
+          gameState.activeLevelId += 1;
+        } else {
+          gameState.activeLevelId = 6; // Open Master Keypad
+        }
+        renderRoomList();
+        renderActiveContent();
+      });
+
+      // Restart / Retry Buttons
+      document.getElementById('restart-game-btn').addEventListener('click', resetGame);
+      document.getElementById('retry-game-btn').addEventListener('click', resetGame);
+    }
+
+    function startTimer() {
+      gameState.timerInterval = setInterval(() => {
+        if (gameState.timeLeft > 0) {
+          gameState.timeLeft--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(gameState.timerInterval);
+          triggerGameOver();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(gameState.timeLeft / 60);
+      const seconds = gameState.timeLeft % 60;
+      const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const display = document.getElementById('timer-display');
+      display.textContent = formatted;
+
+      if (gameState.timeLeft < 180) { // < 3 minutes warning
+        display.classList.remove('text-amber-400');
+        display.classList.add('text-rose-500', 'animate-pulse');
+      }
+    }
+
+    function updateScoreDisplay(change = 0) {
+      gameState.score = Math.max(0, gameState.score + change);
+      document.getElementById('score-display').textContent = gameState.score;
+      if (gameState.score === 0 && !gameState.gameFinished) {
+        triggerGameOver();
+      }
+    }
+
+    function addSystemLog(msg, type = 'info') {
+      const logs = document.getElementById('system-logs');
+      const p = document.createElement('p');
+      if (type === 'success') p.className = 'text-emerald-400 font-semibold';
+      else if (type === 'error') p.className = 'text-rose-400';
+      else if (type === 'warning') p.className = 'text-amber-400';
+      else p.className = 'text-slate-400';
+
+      const time = new Date().toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      p.textContent = `[${time}] ${msg}`;
+      logs.appendChild(p);
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    /* ==========================================================================
+       5. RENDER MASTER LOCK & ROOM MAP
+       ========================================================================== */
+    function renderMasterLockHeader() {
+      const container = document.getElementById('master-lock-container');
+      container.innerHTML = '';
+
+      LEVELS.forEach((lvl, idx) => {
+        const unlocked = gameState.unlockedCodeDigits[idx];
+        const digitBox = document.createElement('div');
+        digitBox.className = `w-8 h-9 rounded-lg border font-orbitron font-extrabold text-sm flex items-center justify-center transition-all ${
+          unlocked 
+            ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-neon-amber scale-105' 
+            : 'bg-slate-900 border-slate-700 text-slate-600'
+        }`;
+        digitBox.textContent = unlocked ? lvl.codeDigit : '?';
+        container.appendChild(digitBox);
+      });
+    }
+
+    function renderRoomList() {
+      const roomListContainer = document.getElementById('room-list');
+      roomListContainer.innerHTML = '';
+
+      let solvedCount = Object.keys(gameState.completedLevels).length;
+      document.getElementById('progress-indicator').textContent = `${solvedCount} / 5 Terbuka`;
+
+      LEVELS.forEach((lvl) => {
+        const isUnlocked = gameState.unlockedLevels.includes(lvl.id);
+        const isCompleted = gameState.completedLevels[lvl.id] !== undefined;
+        const isActive = gameState.activeLevelId === lvl.id;
+
+        const btn = document.createElement('button');
+        btn.disabled = !isUnlocked;
+        
+        let statusBadge = '';
+        if (isCompleted) {
+          statusBadge = `<span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-check-circle"></i> [ ${lvl.codeDigit} ]</span>`;
+        } else if (isUnlocked) {
+          statusBadge = `<span class="text-xs text-cyan-400 font-semibold animate-pulse">AKTIF</span>`;
+        } else {
+          statusBadge = `<span class="text-xs text-slate-600"><i class="fa-solid fa-lock"></i> TERKUNCI</span>`;
+        }
+
+        btn.className = `w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between ${
+          isActive 
+            ? 'bg-cyan-500/15 border-cyan-400 shadow-neon-cyan text-cyan-200' 
+            : isUnlocked 
+              ? 'bg-slate-800/60 border-slate-700 hover:border-cyan-500/50 text-slate-300' 
+              : 'bg-slate-950/40 border-slate-900 text-slate-600 cursor-not-allowed opacity-60'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg ${isCompleted ? 'bg-emerald-500/20 text-emerald-400' : isActive ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-600'} flex items-center justify-center font-orbitron font-bold text-xs">
+              0${lvl.id}
+            </div>
+            <div>
+              <div class="font-orbitron font-bold text-xs ${isActive ? 'text-cyan-300' : 'text-slate-300'}">${lvl.roomName}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${lvl.difficulty}</div>
+            </div>
+          </div>
+          <div>${statusBadge}</div>
+        `;
+
+        btn.addEventListener('click', () => {
+          if (isUnlocked) {
+            sound.playClick();
+            gameState.activeLevelId = lvl.id;
+            renderRoomList();
+            renderActiveContent();
+          }
+        });
+
+        roomListContainer.appendChild(btn);
+      });
+    }
+
+    /* ==========================================================================
+       6. RENDER ACTIVE CONTENT (CHALLENGE / KEYPAD)
+       ========================================================================== */
+    function renderActiveContent() {
+      const container = document.getElementById('challenge-card');
+
+      if (gameState.activeLevelId === 6) {
+        // Render Master Exit Keypad Screen
+        renderMasterKeypad(container);
+        return;
+      }
+
+      const level = LEVELS.find(l => l.id === gameState.activeLevelId);
+      if (!level) return;
+
+      const isCompleted = gameState.completedLevels[level.id] !== undefined;
+
+      container.innerHTML = `
+        <!-- Challenge Header -->
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-orbitron font-bold px-2.5 py-0.5 rounded border ${level.diffClass}">
+                  ${level.difficulty}
+                </span>
+                <span class="text-xs font-mono text-slate-400">${level.roomName}</span>
+              </div>
+              <h2 class="font-orbitron font-extrabold text-lg md:text-xl text-cyan-300 mt-1">
+                ${level.title}
+              </h2>
+            </div>
+            ${isCompleted ? `
+              <div class="bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 px-3 py-1 rounded-lg font-orbitron font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check"></i> TERSELESAIKAN (DIGIT: ${level.codeDigit})
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Story Narrative Context -->
+          <div class="bg-slate-950/70 border border-cyan-500/20 rounded-xl p-3.5 text-xs text-slate-300 leading-relaxed font-mono relative">
+            <i class="fa-solid fa-quote-left text-cyan-500/30 text-2xl absolute top-2 right-3 pointer-events-none"></i>
+            <p><strong class="text-cyan-400">[NARASI MANTRA SIBER]:</strong> ${level.story}</p>
+          </div>
+
+          <!-- Math Problem Container -->
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 md:p-5 text-sm font-sans space-y-3 shadow-inner">
+            <div class="text-cyan-400 font-orbitron font-bold text-xs uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-file-contract"></i> SOAL TANTANGAN MATEMATIKA:
+            </div>
+            <div class="text-slate-100 font-medium leading-relaxed whitespace-pre-line text-sm md:text-base" id="math-question">
+              ${level.question}
+            </div>
+          </div>
+        </div>
+
+        <!-- Answer Section & Hints -->
+        <div class="mt-6 space-y-5">
+          
+          <!-- Answer Input Form -->
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-center gap-3">
+            <div class="w-full md:w-auto flex-1 relative">
+              <input 
+                type="number" 
+                id="answer-input" 
+                placeholder="${isCompleted ? 'Sudah Terjawab: ' + level.answer : 'Masukkan angka jawaban...'}" 
+                value="${isCompleted ? level.answer : ''}"
+                ${isCompleted ? 'disabled' : ''}
+                class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-cyan-300 font-orbitron font-bold text-base outline-none transition placeholder:text-slate-600 placeholder:font-sans placeholder:text-xs"
+              />
+            </div>
+            <button 
+              id="submit-answer-btn" 
+              ${isCompleted ? 'disabled' : ''}
+              class="w-full md:w-auto bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-orbitron font-bold text-xs uppercase px-6 py-3.5 rounded-xl transition shadow-neon-cyan disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <i class="fa-solid fa-key"></i>
+              <span>${isCompleted ? 'TERVERIFIKASI' : 'SUBMIT JAWABAN'}</span>
+            </button>
+          </div>
+
+          <!-- Gradual Hints Section -->
+          <div class="border border-slate-800 rounded-xl p-4 bg-slate-950/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-orbitron font-bold text-xs text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb"></i> PETUNJUK BERTAHAP (GRADUAL HINTS)
+              </h3>
+              <span class="text-[10px] text-slate-500 font-mono">Buka hint jika kesulitan (-poin)</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+              ${level.hints.map((h, i) => {
+                const isHintUnlocked = gameState.hintsUsed[level.id].includes(h.level);
+                return `
+                  <button 
+                    onclick="unlockHint(${level.id}, ${h.level}, ${h.cost})"
+                    ${isHintUnlocked ? 'disabled' : ''}
+                    class="p-2.5 rounded-lg border text-xs text-left transition flex flex-col justify-between ${
+                      isHintUnlocked 
+                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' 
+                        : 'bg-slate-900 border-slate-800 hover:border-amber-500/50 text-slate-400'
+                    }"
+                  >
+                    <div class="flex items-center justify-between font-orbitron font-bold text-[11px] mb-1">
+                      <span>HINT ${h.level}</span>
+                      <span class="${isHintUnlocked ? 'text-amber-400' : 'text-slate-500'}">
+                        ${isHintUnlocked ? '<i class="fa-solid fa-lock-open"></i> DIBUKA' : '-' + h.cost + ' Pts'}
+                      </span>
+                    </div>
+                    <div class="text-[11px] leading-tight font-sans">
+                      ${isHintUnlocked ? h.text : 'Klik untuk membuka petunjuk lanjutan...'}
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      // Render math expressions with KaTeX
+      renderMathInElement(document.getElementById('challenge-card'), {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ]
+      });
+
+      // Submit listener
+      if (!isCompleted) {
+        const inputEl = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-answer-btn');
+
+        submitBtn.addEventListener('click', () => processAnswerSubmit(level));
+        inputEl.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') processAnswerSubmit(level);
+        });
+      }
+    }
+
+    /* ==========================================================================
+       7. ANSWER EVALUATION & HINT UNLOCKING
+       ========================================================================== */
+    function processAnswerSubmit(level) {
+      const inputEl = document.getElementById('answer-input');
+      const val = parseInt(inputEl.value.trim());
+
+      if (isNaN(val)) {
+        sound.playWrong();
+        addSystemLog(`Input jawaban tidak valid. Masukkan angka positif.`, 'error');
+        return;
+      }
+
+      if (val === level.answer) {
+        // Correct Answer!
+        sound.playCorrect();
+        gameState.completedLevels[level.id] = { answer: val, time: gameState.timeLeft };
+        gameState.unlockedCodeDigits[level.id - 1] = true;
+
+        addSystemLog(`Jawaban Level ${level.id} BENAR! Digit #${level.id} (${level.codeDigit}) terbuka!`, 'success');
+
+        // Unlock next room automatically
+        if (level.id < 5 && !gameState.unlockedLevels.includes(level.id + 1)) {
+          gameState.unlockedLevels.push(level.id + 1);
+        }
+
+        renderMasterLockHeader();
+        renderRoomList();
+
+        // Show Explanation Modal
+        showExplanationModal(level);
+
+      } else {
+        // Wrong Answer
+        sound.playWrong();
+        updateScoreDisplay(-100);
+        addSystemLog(`Jawaban Level ${level.id} SALAH (-100 Poin). Coba lagi!`, 'error');
+
+        // Input Shake Animation
+        inputEl.classList.add('border-rose-500', 'animate-bounce');
+        setTimeout(() => inputEl.classList.remove('border-rose-500', 'animate-bounce'), 1000);
+      }
+    }
+
+    window.unlockHint = function(levelId, hintLevel, cost) {
+      if (gameState.hintsUsed[levelId].includes(hintLevel)) return;
+
+      if (gameState.score < cost) {
+        sound.playWrong();
+        addSystemLog(`Skor tidak cukup untuk membuka Hint ${hintLevel}!`, 'error');
+        return;
+      }
+
+      sound.playClick();
+      gameState.hintsUsed[levelId].push(hintLevel);
+      gameState.totalHintsCount++;
+      updateScoreDisplay(-cost);
+      addSystemLog(`Hint ${hintLevel} Level ${levelId} dibuka (-${cost} Poin).`, 'warning');
+
+      renderActiveContent();
+    };
+
+    function showExplanationModal(level) {
+      const modal = document.getElementById('explanation-modal');
+      document.getElementById('explanation-subtitle').textContent = `Berhasil Menyelesaikan ${level.roomName}`;
+      document.getElementById('unlocked-digit-badge').textContent = `DIGIT KODE: ${level.codeDigit}`;
+      
+      const contentEl = document.getElementById('explanation-content');
+      contentEl.innerHTML = level.explanation;
+
+      // Render math inside modal
+      renderMathInElement(contentEl, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ]
+      });
+
+      modal.classList.remove('hidden');
+    }
+
+    /* ==========================================================================
+       8. MASTER EXIT KEYPAD SCREEN (LEVEL 06)
+       ========================================================================== */
+    function renderMasterKeypad(container) {
+      container.innerHTML = `
+        <div class="max-w-md mx-auto w-full space-y-6 text-center py-4">
+          <div class="space-y-1">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400 text-xl shadow-neon-amber">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <h2 class="font-orbitron font-extrabold text-xl text-amber-300 uppercase tracking-widest">
+              TERMINAL PINTU UTAMA ESCAPE
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Masukkan 5-Digit Kode Sakelar Darurat</p>
+          </div>
+
+          <!-- Keypad Screen Display -->
+          <div class="bg-slate-950 border-2 border-amber-500/50 rounded-2xl p-4 shadow-inner">
+            <div id="keypad-display" class="font-orbitron font-black text-3xl tracking-[0.4em] text-cyan-400 h-12 flex items-center justify-center">
+              ${gameState.keypadInput.padEnd(5, '_')}
+            </div>
+          </div>
+
+          <!-- Keypad Grid (0-9, Clear, Submit) -->
+          <div class="grid grid-cols-3 gap-3">
+            ${[1,2,3,4,5,6,7,8,9].map(num => `
+              <button onclick="pressKey('${num}')" class="key-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-400 text-cyan-300 font-orbitron font-bold text-xl py-3.5 rounded-xl transition shadow">
+                ${num}
+              </button>
+            `).join('')}
+            <button onclick="clearKeypad()" class="key-btn bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/50 text-rose-400 font-orbitron font-bold text-xs py-3.5 rounded-xl transition uppercase">
+              CLEAR
+            </button>
+            <button onclick="pressKey('0')" class="key-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-400 text-cyan-300 font-orbitron font-bold text-xl py-3.5 rounded-xl transition shadow">
+              0
+            </button>
+            <button onclick="submitMasterCode()" class="key-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-orbitron font-black text-xs py-3.5 rounded-xl transition shadow-neon-amber uppercase">
+              ENTER
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.pressKey = function(digit) {
+      if (gameState.keypadInput.length < 5) {
+        sound.playClick();
+        gameState.keypadInput += digit;
+        document.getElementById('keypad-display').textContent = gameState.keypadInput.padEnd(5, '_');
+      }
+    };
+
+    window.clearKeypad = function() {
+      sound.playClick();
+      gameState.keypadInput = "";
+      document.getElementById('keypad-display').textContent = "_____";
+    };
+
+    window.submitMasterCode = function() {
+      if (gameState.keypadInput.length !== 5) {
+        sound.playWrong();
+        addSystemLog("Kode harus 5 digit!", "error");
+        return;
+      }
+
+      if (gameState.keypadInput === MASTER_CODE) {
+        // ESCAPE SUCCESS!
+        sound.playUnlock();
+        setTimeout(() => {
+          sound.playVictory();
+          triggerVictory();
+        }, 500);
+      } else {
+        // WRONG CODE
+        sound.playWrong();
+        updateScoreDisplay(-100);
+        addSystemLog("KODE SALAH! Penalti -100 Poin.", "error");
+        window.clearKeypad();
+      }
+    };
+
+    /* ==========================================================================
+       9. VICTORY & GAME OVER HANDLERS
+       ========================================================================== */
+    function triggerVictory() {
+      gameState.gameFinished = true;
+      clearInterval(gameState.timerInterval);
+
+      // Time bonus
+      const timeBonus = gameState.timeLeft * 2;
+      const finalScore = gameState.score + timeBonus;
+
+      document.getElementById('final-score').textContent = `${finalScore} Pts (${gameState.score} + ${timeBonus} Bonus Waktu)`;
+      
+      const totalSecondsUsed = 1200 - gameState.timeLeft;
+      const mins = Math.floor(totalSecondsUsed / 60);
+      const secs = totalSecondsUsed % 60;
+      document.getElementById('final-time').textContent = `${mins}m ${secs}s`;
+      document.getElementById('final-hints').textContent = `${gameState.totalHintsCount} Hint`;
+
+      // Mathematical Badge Title
+      let badge = "JUNIOR OPERATOR";
+      if (finalScore >= 6000) badge = "QUANTUM MATH MASTER (S+)";
+      else if (finalScore >= 4500) badge = "SENIOR CODEBREAKER (A+)";
+      else if (finalScore >= 3000) badge = "CYBER DECRYPTER (B)";
+      
+      document.getElementById('final-badge').textContent = badge;
+
+      document.getElementById('victory-modal').classList.remove('hidden');
+    }
+
+    function triggerGameOver() {
+      gameState.gameFinished = true;
+      clearInterval(gameState.timerInterval);
+      sound.playWrong();
+      document.getElementById('gameover-modal').classList.remove('hidden');
+    }
+
+    function resetGame() {
+      sound.playClick();
+      gameState.activeLevelId = 1;
+      gameState.unlockedLevels = [1];
+      gameState.completedLevels = {};
+      gameState.unlockedCodeDigits = [false, false, false, false, false];
+      gameState.hintsUsed = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+      gameState.score = 5000;
+      gameState.timeLeft = 1200;
+      gameState.keypadInput = "";
+      gameState.gameFinished = false;
+      gameState.totalHintsCount = 0;
+
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+      document.getElementById('victory-modal').classList.add('hidden');
+      document.getElementById('gameover-modal').classList.add('hidden');
+      document.getElementById('explanation-modal').classList.add('hidden');
+
+      updateScoreDisplay(0);
+      updateTimerDisplay();
+      renderMasterLockHeader();
+      renderRoomList();
+      renderActiveContent();
+      startTimer();
+
+      addSystemLog("Simulasi direset. Misi Escape dimulai kembali.", "info");
+    }
+  </script>
+</body>
+</html>
