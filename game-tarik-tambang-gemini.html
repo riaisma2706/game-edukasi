@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarik Tambang Persamaan Kuadrat</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+        }
+        
+        /* Smooth animations */
+        .rope-container {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 1.8s infinite ease-in-out;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 0.9; }
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* Custom Canvas Confetti overlay */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- HEADER / TOP NAV -->
+    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-cyan-400 p-2 rounded-xl text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
+                    🪢
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 bg-clip-text text-transparent">
+                        Tarik Tambang Persamaan Kuadrat
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Adu Ketangkasan & Logika Matematika</p>
+                </div>
+            </div>
+
+            <!-- Sound & Restart Controls -->
+            <div class="flex items-center gap-2">
+                <button id="btn-sound" onclick="game.toggleSound()" class="p-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 transition text-slate-200 text-sm font-semibold flex items-center gap-2 border border-slate-600">
+                    <span id="sound-icon">🔊</span>
+                    <span id="sound-text" class="hidden md:inline">Suara: ON</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto w-full px-4 py-4 sm:py-6 flex-grow flex flex-col justify-center">
+
+        <!-- ================= 1. START SCREEN ================= -->
+        <div id="start-screen" class="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 sm:p-8 shadow-2xl backdrop-blur-sm text-center max-w-2xl mx-auto my-auto w-full">
+            <div class="inline-block p-4 bg-indigo-500/10 rounded-full border border-indigo-500/20 mb-4">
+                <span class="text-5xl">⚔️</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Pertandingan 2 Tim</h2>
+            <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
+                Jawab soal persamaan kuadrat secara bergantian. Setiap jawaban benar akan menarik tali ke arah timmu! Jawaban salah akan memberi keuntungan pada lawan.
+            </p>
+
+            <!-- Team Names Input -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-left">
+                <div class="bg-blue-950/40 p-4 rounded-xl border border-blue-500/30">
+                    <label class="block text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Nama Tim Kiri (Biru)</label>
+                    <input type="text" id="input-team-kiri" value="Tim Biru" class="w-full bg-slate-900 border border-blue-500/40 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-blue-400">
+                </div>
+                <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-500/30">
+                    <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Nama Tim Kanan (Kuning/Merah)</label>
+                    <input type="text" id="input-team-kanan" value="Tim Kuning" class="w-full bg-slate-900 border border-amber-500/40 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-amber-400">
+                </div>
+            </div>
+
+            <!-- Rules Summary -->
+            <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/80 mb-6 text-left text-xs sm:text-sm text-slate-300 space-y-2">
+                <div class="font-bold text-slate-200 border-b border-slate-700 pb-1 mb-2">📜 Aturan Permainan:</div>
+                <p>1. Total ada <strong>5 Ronde</strong> (10 soal total, 5 untuk tiap tim).</p>
+                <p>2. Jawaban <strong>BENAR</strong> = Tali ditarik 1 langkah ke arah timmu.</p>
+                <p>3. Jawaban <strong>SALAH</strong> = Tali ditarik 1 langkah ke arah tim LAWAN.</p>
+                <p>4. Dominasi total (Tarik mencapai ujung ±5) = <strong>K.O. Kemenangan Langsung!</strong></p>
+            </div>
+
+            <button onclick="game.start()" class="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-amber-600 hover:from-blue-500 hover:to-amber-500 rounded-xl font-extrabold text-white text-lg shadow-xl hover:shadow-indigo-500/25 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                🚀 MULAI PERTANDINGAN
+            </button>
+        </div>
+
+
+        <!-- ================= 2. GAMEPLAY SCREEN ================= -->
+        <div id="game-screen" class="hidden flex flex-col gap-5">
+
+            <!-- Turn Status Banner -->
+            <div id="turn-banner" class="bg-slate-800 rounded-xl p-3 sm:p-4 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <span id="turn-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/40">
+                        Ronde 1 / 5
+                    </span>
+                    <span id="turn-text" class="font-bold text-sm sm:text-base text-slate-200">
+                        Giliran: <span id="current-team-name" class="text-blue-400">Tim Biru</span>
+                    </span>
+                </div>
+                <div class="text-xs text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                    Posisi Tali: <strong id="rope-pos-text" class="text-white">0 (Netral)</strong>
+                </div>
+            </div>
+
+            <!-- Visual Arena (Tug-Of-War SVG Render) -->
+            <div class="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl border border-slate-700/80 p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+                
+                <!-- SVG Tug of War Illustration -->
+                <div class="w-full h-44 sm:h-52 relative flex items-center justify-center overflow-hidden rounded-xl bg-slate-950/60 border border-slate-800">
+                    
+                    <!-- Background Environment (Mud Pit Center) -->
+                    <div class="absolute inset-x-0 bottom-0 h-10 bg-amber-950/40 border-t-2 border-amber-900/60"></div>
+                    <div class="absolute left-1/2 bottom-0 -translate-x-1/2 w-20 h-12 bg-amber-900/80 rounded-t-full border-t border-amber-700/50 flex items-center justify-center">
+                        <span class="text-[10px] font-extrabold text-amber-300 uppercase tracking-widest opacity-75">Lumpur</span>
+                    </div>
+
+                    <!-- Center Line Marker -->
+                    <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 border-r-2 border-dashed border-slate-500/40 z-0"></div>
+
+                    <!-- Interactive Moving Rope & Teams -->
+                    <div id="rope-stage" class="rope-container absolute w-full flex items-center justify-center transition-transform duration-700">
+                        <svg viewBox="0 0 800 200" class="w-[850px] h-[180px] overflow-visible">
+                            <defs>
+                                <!-- Rope Texture Pattern -->
+                                <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#b45309" />
+                                    <stop offset="50%" stop-color="#d97706" />
+                                    <stop offset="100%" stop-color="#b45309" />
+                                </linearGradient>
+                                <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#3b82f6" flood-opacity="0.8"/>
+                                </filter>
+                                <filter id="glowAmber" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f59e0b" flood-opacity="0.8"/>
+                                </filter>
+                            </defs>
+
+                            <!-- The Rope -->
+                            <line x1="80" y1="120" x2="720" y2="120" stroke="url(#ropeGrad)" stroke-width="12" stroke-linecap="round" />
+
+                            <!-- Center Red Ribbon / Flag on Rope -->
+                            <g transform="translate(400, 120)">
+                                <polygon points="-2,0 2,0 8,30 -8,30" fill="#ef4444" />
+                                <circle cx="0" cy="0" r="7" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+                            </g>
+
+                            <!-- LEFT TEAM AVATARS (BLUE) -->
+                            <g id="team-left-svg" filter="url(#glowBlue)">
+                                <!-- Player 1 -->
+                                <g transform="translate(180, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#60a5fa" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                                <!-- Player 2 -->
+                                <g transform="translate(110, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#3b82f6" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#1d4ed8" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                                <!-- Player 3 -->
+                                <g transform="translate(40, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#2563eb" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#1e40af" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                            </g>
+
+                            <!-- RIGHT TEAM AVATARS (AMBER/YELLOW) -->
+                            <g id="team-right-svg" filter="url(#glowAmber)">
+                                <!-- Player 1 -->
+                                <g transform="translate(580, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#fbbf24" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#d97706" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                                <!-- Player 2 -->
+                                <g transform="translate(650, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#f59e0b" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#b45309" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                                <!-- Player 3 -->
+                                <g transform="translate(720, 75)">
+                                    <circle cx="20" cy="15" r="14" fill="#d97706" />
+                                    <path d="M5,45 Q20,30 35,45" fill="none" stroke="#92400e" stroke-width="16" stroke-linecap="round" />
+                                    <circle cx="16" cy="12" r="2.5" fill="#1e293b" /><circle cx="24" cy="12" r="2.5" fill="#1e293b" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Position Gauge (-5 to +5) -->
+                <div class="mt-4 pt-2 border-t border-slate-700/60">
+                    <div class="flex justify-between text-[11px] font-extrabold text-slate-400 mb-1 px-1">
+                        <span class="text-blue-400 font-bold">← MENANG (KIRI)</span>
+                        <span class="text-slate-400">NETRAL (0)</span>
+                        <span class="text-amber-400 font-bold">(KANAN) MENANG →</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-11 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800 text-center">
+                        <div id="marker--5" class="py-1 rounded text-xs font-bold transition"> -5 </div>
+                        <div id="marker--4" class="py-1 rounded text-xs font-bold transition"> -4 </div>
+                        <div id="marker--3" class="py-1 rounded text-xs font-bold transition"> -3 </div>
+                        <div id="marker--2" class="py-1 rounded text-xs font-bold transition"> -2 </div>
+                        <div id="marker--1" class="py-1 rounded text-xs font-bold transition"> -1 </div>
+                        <div id="marker-0"  class="py-1 rounded text-xs font-bold transition">  0 </div>
+                        <div id="marker-1"  class="py-1 rounded text-xs font-bold transition"> +1 </div>
+                        <div id="marker-2"  class="py-1 rounded text-xs font-bold transition"> +2 </div>
+                        <div id="marker-3"  class="py-1 rounded text-xs font-bold transition"> +3 </div>
+                        <div id="marker-4"  class="py-1 rounded text-xs font-bold transition"> +4 </div>
+                        <div id="marker-5"  class="py-1 rounded text-xs font-bold transition"> +5 </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUESTION CARD -->
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 sm:p-6 shadow-xl relative">
+                
+                <!-- Topic Header -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-700">
+                    <span id="topic-badge" class="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold">
+                        Topik Soal
+                    </span>
+                    <span id="team-turn-indicator" class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Soal Untuk: <strong id="question-target-team" class="text-blue-400">Tim Kiri</strong>
+                    </span>
+                </div>
+
+                <!-- Question Body -->
+                <div class="mb-6">
+                    <p id="question-text" class="text-base sm:text-xl font-bold text-slate-100 leading-relaxed">
+                        Memuat pertanyaan...
+                    </p>
+                </div>
+
+                <!-- Answer Choices (4 Options) -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Dynamic option buttons injected via JS -->
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= 3. EXPLANATION MODAL ================= -->
+        <div id="explanation-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-xl w-full shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in duration-200">
+                
+                <div id="modal-header-badge" class="flex items-center gap-3">
+                    <div id="modal-icon" class="text-3xl">✅</div>
+                    <div>
+                        <h3 id="modal-title" class="text-xl font-extrabold text-white">Jawaban Tepat!</h3>
+                        <p id="modal-subtitle" class="text-xs text-slate-300">Tali berhasil ditarik ke arah timmu.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-700/70 text-sm text-slate-200 space-y-2">
+                    <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Langkah Penyelesaian Matematika:</div>
+                    <div id="modal-explanation-content" class="leading-relaxed font-mono text-xs sm:text-sm text-slate-300 whitespace-pre-line">
+                        Penjelasan solusi disini...
+                    </div>
+                </div>
+
+                <button onclick="game.nextQuestion()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl transition shadow-lg shadow-indigo-600/30">
+                    Lanjut Ke Soal Berikutnya ➔
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ================= 4. VICTORY / GAME OVER SCREEN ================= -->
+        <div id="victory-screen" class="hidden bg-slate-800/95 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl text-center max-w-2xl mx-auto my-auto w-full">
+            <div class="text-6xl mb-3 animate-bounce">🏆</div>
+            <h2 id="winner-title" class="text-3xl sm:text-4xl font-extrabold text-amber-400 mb-2">TIM BIRU MENANG!</h2>
+            <p id="winner-reason" class="text-slate-300 text-sm sm:text-base mb-6">Dominasi penuh dengan menarik tali melebihi batas!</p>
+
+            <div class="grid grid-cols-2 gap-4 bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-6 text-left">
+                <div>
+                    <span class="block text-xs text-slate-400">Poin Akhir Tali</span>
+                    <strong id="final-rope-pos" class="text-lg font-extrabold text-indigo-400">-5 (Kiri)</strong>
+                </div>
+                <div>
+                    <span class="block text-xs text-slate-400">Total Ronde Dimainkan</span>
+                    <strong id="final-rounds-count" class="text-lg font-extrabold text-slate-200">5 Ronde</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="game.restart()" class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-white shadow-xl transition">
+                    🔄 Main Lagi
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-3 text-center text-xs text-slate-500 border-t border-slate-800">
+        Media Pembelajaran Interaktif Persamaan Kuadrat • Tarik Tambang Math
+    </footer>
+
+    <!-- SCRIPT GAME ENGINE -->
+    <script>
+        /* ================= Web Audio API Sound Generator ================= */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq, duration, type = 'sine', startGain = 0.2, endGain = 0.001) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(startGain, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(Math.max(endGain, 0.0001), this.ctx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio playback error', e);
+                }
+            }
+
+            pull() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.25);
+                } catch(e) {}
+            }
+
+            correct() {
+                this.playTone(523.25, 0.1, 'triangle', 0.25); // C5
+                setTimeout(() => this.playTone(659.25, 0.1, 'triangle', 0.25), 90); // E5
+                setTimeout(() => this.playTone(783.99, 0.25, 'triangle', 0.25), 180); // G5
+            }
+
+            wrong() {
+                this.playTone(180, 0.15, 'sawtooth', 0.25);
+                setTimeout(() => this.playTone(130, 0.3, 'sawtooth', 0.25), 130);
+            }
+
+            victory() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 0.25, 'triangle', 0.3), i * 140);
+                });
+            }
+        }
+
+        const sound = new SoundFX();
+
+        /* ================= Canvas Confetti Effect ================= */
+        class Confetti {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animating = false;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            start() {
+                this.particles = [];
+                const colors = ['#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#8b5cf6'];
+                for (let i = 0; i < 120; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height - this.canvas.height,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 8 + 4,
+                        speedY: Math.random() * 4 + 2,
+                        speedX: Math.random() * 2 - 1,
+                        rotation: Math.random() * 360,
+                        rotSpeed: Math.random() * 6 - 3
+                    });
+                }
+                if (!this.animating) {
+                    this.animating = true;
+                    this.loop();
+                }
+            }
+
+            stop() {
+                this.animating = false;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            loop() {
+                if (!this.animating) return;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles.forEach((p) => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.rotSpeed;
+
+                    if (p.y > this.canvas.height) {
+                        p.y = -10;
+                        p.x = Math.random() * this.canvas.width;
+                    }
+
+                    this.ctx.save();
+                    this.ctx.translate(p.x, p.y);
+                    this.ctx.rotate((p.rotation * Math.PI) / 180);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    this.ctx.restore();
+                });
+
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        const confetti = new Confetti();
+
+        /* ================= Soal & Bank Data ================= */
+        // 5 pasang soal untuk Tim Kiri dan Tim Kanan (Total 10 Soal)
+        const questionsData = [
+            // --- PASANG 1: Bentuk Umum ax^2 + bx + c = 0 ---
+            {
+                team: 'kiri',
+                round: 1,
+                topic: 'Bentuk Umum Persamaan Kuadrat',
+                question: 'Tentukan nilai a, b, dan c dari persamaan kuadrat: <br><span class="text-2xl font-mono text-amber-300 my-2 block">2x² - 5x + 3 = 0</span>',
+                options: [
+                    'a = 2, b = -5, c = 3',
+                    'a = 2, b = 5, c = 3',
+                    'a = -2, b = -5, c = 3',
+                    'a = 2, b = -5, c = -3'
+                ],
+                correct: 0,
+                explanation: `Bentuk umum persamaan kuadrat adalah ax² + bx + c = 0.\n\nDari persamaan 2x² - 5x + 3 = 0:\n• Koefisien x²  ➔  a = 2\n• Koefisien x   ➔  b = -5\n• Konstanta     ➔  c = 3`
+            },
+            {
+                team: 'kanan',
+                round: 1,
+                topic: 'Bentuk Umum Persamaan Kuadrat',
+                question: 'Tentukan nilai a, b, dan c dari persamaan kuadrat: <br><span class="text-2xl font-mono text-amber-300 my-2 block">-x² + 4x - 7 = 0</span>',
+                options: [
+                    'a = 1, b = 4, c = -7',
+                    'a = -1, b = 4, c = -7',
+                    'a = -1, b = -4, c = 7',
+                    'a = -1, b = 4, c = 7'
+                ],
+                correct: 1,
+                explanation: `Persamaan -x² + 4x - 7 = 0 dapat ditulis sebagai:\n(-1)x² + (4)x + (-7) = 0\n\nMaka diperoleh:\n• a = -1\n• b = 4\n• c = -7`
+            },
+
+            // --- PASANG 2: Pemfaktoran & Akar-Akar ---
+            {
+                team: 'kiri',
+                round: 2,
+                topic: 'Pemfaktoran & Akar-Akar',
+                question: 'Akar-akar dari persamaan kuadrat berikut adalah: <br><span class="text-2xl font-mono text-amber-300 my-2 block">x² - 5x + 6 = 0</span>',
+                options: [
+                    'x = -2 dan x = -3',
+                    'x = 2 dan x = 3',
+                    'x = 1 dan x = 6',
+                    'x = -1 dan x = -6'
+                ],
+                correct: 1,
+                explanation: `Cari dua angka jika dikali = 6 dan dijumlah = -5.\nAngka tersebut adalah -2 dan -3.\n\nFaktorkan:\n(x - 2)(x - 3) = 0\nx - 2 = 0 ➔ x = 2\nx - 3 = 0 ➔ x = 3`
+            },
+            {
+                team: 'kanan',
+                round: 2,
+                topic: 'Pemfaktoran & Akar-Akar',
+                question: 'Akar-akar dari persamaan kuadrat berikut adalah: <br><span class="text-2xl font-mono text-amber-300 my-2 block">x² - 7x + 12 = 0</span>',
+                options: [
+                    'x = 3 dan x = 4',
+                    'x = -3 dan x = -4',
+                    'x = 2 dan x = 6',
+                    'x = 1 dan x = 12'
+                ],
+                correct: 0,
+                explanation: `Cari dua angka jika dikali = 12 dan dijumlah = -7.\nAngka tersebut adalah -3 dan -4.\n\nFaktorkan:\n(x - 3)(x - 4) = 0\nx - 3 = 0 ➔ x = 3\nx - 4 = 0 ➔ x = 4`
+            },
+
+            // --- PASANG 3: Diskriminan D = b^2 - 4ac ---
+            {
+                team: 'kiri',
+                round: 3,
+                topic: 'Nilai Diskriminan (D = b² - 4ac)',
+                question: 'Berapakah nilai diskriminan dari persamaan kuadrat: <br><span class="text-2xl font-mono text-amber-300 my-2 block">x² + 4x + 4 = 0</span>',
+                options: [
+                    'D = 16',
+                    'D = 8',
+                    'D = 0',
+                    'D = -16'
+                ],
+                correct: 2,
+                explanation: `Diketahui: a = 1, b = 4, c = 4\nRumus Diskriminan: D = b² - 4ac\n\nD = (4)² - 4(1)(4)\nD = 16 - 16\nD = 0  (Memiliki 2 akar kembar/real sama)`
+            },
+            {
+                team: 'kanan',
+                round: 3,
+                topic: 'Nilai Diskriminan (D = b² - 4ac)',
+                question: 'Berapakah nilai diskriminan dari persamaan kuadrat: <br><span class="text-2xl font-mono text-amber-300 my-2 block">x² - 3x - 4 = 0</span>',
+                options: [
+                    'D = 25',
+                    'D = 7',
+                    'D = -7',
+                    'D = 1'
+                ],
+                correct: 0,
+                explanation: `Diketahui: a = 1, b = -3, c = -4\nRumus Diskriminan: D = b² - 4ac\n\nD = (-3)² - 4(1)(-4)\nD = 9 + 16\nD = 25`
+            },
+
+            // --- PASANG 4: Jumlah dan Hasil Kali Akar ---
+            {
+                team: 'kiri',
+                round: 4,
+                topic: 'Jumlah & Hasil Kali Akar',
+                question: 'Jika x₁ dan x₂ adalah akar-akar dari x² - 6x + 8 = 0, berapakah nilai <span class="text-amber-300 font-mono">x₁ + x₂</span> ?',
+                options: [
+                    'x₁ + x₂ = -6',
+                    'x₁ + x₂ = 6',
+                    'x₁ + x₂ = 8',
+                    'x₁ + x₂ = -8'
+                ],
+                correct: 1,
+                explanation: `Dari x² - 6x + 8 = 0 diperoleh a = 1, b = -6, c = 8.\n\nRumus jumlah akar:\nx₁ + x₂ = -b / a\nx₁ + x₂ = -(-6) / 1 = 6`
+            },
+            {
+                team: 'kanan',
+                round: 4,
+                topic: 'Jumlah & Hasil Kali Akar',
+                question: 'Jika x₁ dan x₂ adalah akar-akar dari 2x² + 8x + 6 = 0, berapakah nilai <span class="text-amber-300 font-mono">x₁ · x₂</span> ?',
+                options: [
+                    'x₁ · x₂ = 3',
+                    'x₁ · x₂ = 4',
+                    'x₁ · x₂ = -4',
+                    'x₁ · x₂ = 6'
+                ],
+                correct: 0,
+                explanation: `Dari 2x² + 8x + 6 = 0 diperoleh a = 2, b = 8, c = 6.\n\nRumus hasil kali akar:\nx₁ · x₂ = c / a\nx₁ · x₂ = 6 / 2 = 3`
+            },
+
+            // --- PASANG 5: Menyusun Persamaan Kuadrat ---
+            {
+                team: 'kiri',
+                round: 5,
+                topic: 'Menyusun Persamaan Kuadrat',
+                question: 'Persamaan kuadrat yang memiliki akar-akar <span class="text-amber-300 font-mono">x₁ = 2</span> dan <span class="text-amber-300 font-mono">x₂ = -3</span> adalah...',
+                options: [
+                    'x² + x - 6 = 0',
+                    'x² - x - 6 = 0',
+                    'x² + 5x + 6 = 0',
+                    'x² - 5x - 6 = 0'
+                ],
+                correct: 0,
+                explanation: `Gunakan rumus: (x - x₁)(x - x₂) = 0\n\n(x - 2)(x - (-3)) = 0\n(x - 2)(x + 3) = 0\nx² + 3x - 2x - 6 = 0\nx² + x - 6 = 0`
+            },
+            {
+                team: 'kanan',
+                round: 5,
+                topic: 'Menyusun Persamaan Kuadrat',
+                question: 'Persamaan kuadrat yang memiliki akar-akar <span class="text-amber-300 font-mono">x₁ = -1</span> dan <span class="text-amber-300 font-mono">x₂ = 5</span> adalah...',
+                options: [
+                    'x² + 4x - 5 = 0',
+                    'x² - 4x - 5 = 0',
+                    'x² - 4x + 5 = 0',
+                    'x² + 4x + 5 = 0'
+                ],
+                correct: 1,
+                explanation: `Gunakan rumus: (x - x₁)(x - x₂) = 0\n\n(x - (-1))(x - 5) = 0\n(x + 1)(x - 5) = 0\nx² - 5x + x - 5 = 0\nx² - 4x - 5 = 0`
+            }
+        ];
+
+        /* ================= GAME LOGIC ENGINE ================= */
+        class TugOfWarGame {
+            constructor() {
+                this.teamKiriName = "Tim Biru";
+                this.teamKananName = "Tim Kuning";
+                this.ropePosition = 0; // -5 (Menang Kiri) s/d +5 (Menang Kanan)
+                this.currentQuestionIndex = 0;
+                this.isPlaying = false;
+            }
+
+            start() {
+                sound.init();
+                const inputKiri = document.getElementById('input-team-kiri').value.trim();
+                const inputKanan = document.getElementById('input-team-kanan').value.trim();
+
+                this.teamKiriName = inputKiri || "Tim Biru";
+                this.teamKananName = inputKanan || "Tim Kuning";
+                this.ropePosition = 0;
+                this.currentQuestionIndex = 0;
+                this.isPlaying = true;
+
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('victory-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.remove('hidden');
+
+                confetti.stop();
+                this.updateRopeUI();
+                this.renderQuestion();
+            }
+
+            toggleSound() {
+                sound.muted = !sound.muted;
+                document.getElementById('sound-icon').textContent = sound.muted ? '🔇' : '🔊';
+                document.getElementById('sound-text').textContent = sound.muted ? 'Suara: OFF' : 'Suara: ON';
+            }
+
+            renderQuestion() {
+                if (this.currentQuestionIndex >= questionsData.length) {
+                    this.endGame();
+                    return;
+                }
+
+                const q = questionsData[this.currentQuestionIndex];
+                const isKiri = q.team === 'kiri';
+                const activeTeamName = isKiri ? this.teamKiriName : this.teamKananName;
+
+                // Update Round & Turn Status
+                document.getElementById('turn-badge').textContent = `Ronde ${q.round} / 5`;
+                
+                const turnNameElem = document.getElementById('current-team-name');
+                turnNameElem.textContent = activeTeamName;
+                turnNameElem.className = isKiri ? 'text-blue-400 font-extrabold' : 'text-amber-400 font-extrabold';
+
+                document.getElementById('topic-badge').textContent = `Topik ${q.round}: ${q.topic}`;
+
+                const targetTeamElem = document.getElementById('question-target-team');
+                targetTeamElem.textContent = activeTeamName;
+                targetTeamElem.className = isKiri ? 'text-blue-400 font-extrabold' : 'text-amber-400 font-extrabold';
+
+                // Question text & options
+                document.getElementById('question-text').innerHTML = q.question;
+
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `w-full text-left p-4 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-700/80 hover:border-slate-500 font-semibold text-slate-200 transition flex items-center justify-between group active:scale-[0.99]`;
+                    btn.onclick = () => this.handleAnswer(idx);
+                    
+                    const label = String.fromCharCode(65 + idx); // A, B, C, D
+                    btn.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-500 transition">
+                                ${label}
+                            </span>
+                            <span class="text-sm sm:text-base">${opt}</span>
+                        </div>
+                    `;
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            handleAnswer(selectedIndex) {
+                const q = questionsData[this.currentQuestionIndex];
+                const isKiriTurn = q.team === 'kiri';
+                const isCorrect = selectedIndex === q.correct;
+
+                let pullDirection = 0; // -1 to left, +1 to right
+
+                if (isKiriTurn) {
+                    if (isCorrect) {
+                        pullDirection = -1; // Benar -> Kiri narik ke kiri
+                    } else {
+                        pullDirection = 1;  // Salah -> Kanan narik ke kanan
+                    }
+                } else { // Turn Kanan
+                    if (isCorrect) {
+                        pullDirection = 1;  // Benar -> Kanan narik ke kanan
+                    } else {
+                        pullDirection = -1; // Salah -> Kiri narik ke kiri
+                    }
+                }
+
+                this.ropePosition += pullDirection;
+                // Clamp within -5 to +5
+                this.ropePosition = Math.max(-5, Math.min(5, this.ropePosition));
+
+                sound.pull();
+                if (isCorrect) {
+                    sound.correct();
+                } else {
+                    sound.wrong();
+                }
+
+                this.updateRopeUI();
+                this.showExplanationModal(isCorrect, isKiriTurn, pullDirection, q);
+            }
+
+            updateRopeUI() {
+                // Update SVG Stage displacement
+                // Each step = 35px translation
+                const offsetX = this.ropePosition * 35;
+                const ropeStage = document.getElementById('rope-stage');
+                ropeStage.style.transform = `translateX(${offsetX}px)`;
+
+                // Text status
+                let statusStr = "0 (Netral)";
+                if (this.ropePosition < 0) {
+                    statusStr = `${Math.abs(this.ropePosition)} Langkah ke Kiri (${this.teamKiriName})`;
+                } else if (this.ropePosition > 0) {
+                    statusStr = `${this.ropePosition} Langkah ke Kanan (${this.teamKananName})`;
+                }
+                document.getElementById('rope-pos-text').textContent = statusStr;
+
+                // Update Gauge Scale Markers Highlight
+                for (let i = -5; i <= 5; i++) {
+                    const marker = document.getElementById(`marker-${i}`);
+                    if (!marker) continue;
+
+                    if (i === this.ropePosition) {
+                        if (i < 0) {
+                            marker.className = "py-1 rounded text-xs font-extrabold bg-blue-600 text-white shadow-lg shadow-blue-500/50 scale-110 border border-blue-300";
+                        } else if (i > 0) {
+                            marker.className = "py-1 rounded text-xs font-extrabold bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/50 scale-110 border border-amber-300";
+                        } else {
+                            marker.className = "py-1 rounded text-xs font-extrabold bg-slate-200 text-slate-900 scale-110";
+                        }
+                    } else {
+                        marker.className = "py-1 rounded text-xs font-bold text-slate-500 bg-slate-900/50";
+                    }
+                }
+            }
+
+            showExplanationModal(isCorrect, isKiriTurn, pullDir, q) {
+                const activeTeamName = isKiriTurn ? this.teamKiriName : this.teamKananName;
+                const modal = document.getElementById('explanation-modal');
+                const titleElem = document.getElementById('modal-title');
+                const subtitleElem = document.getElementById('modal-subtitle');
+                const iconElem = document.getElementById('modal-icon');
+                const expContent = document.getElementById('modal-explanation-content');
+
+                if (isCorrect) {
+                    iconElem.textContent = '🎉';
+                    titleElem.textContent = `Jawaban BENAR dari ${activeTeamName}!`;
+                    titleElem.className = 'text-xl font-extrabold text-emerald-400';
+                    const sideName = pullDir < 0 ? this.teamKiriName : this.teamKananName;
+                    subtitleElem.textContent = `Tali ditarik 1 langkah menuju ${sideName}!`;
+                } else {
+                    iconElem.textContent = '❌';
+                    titleElem.textContent = `Jawaban KURANG TEPAT dari ${activeTeamName}!`;
+                    titleElem.className = 'text-xl font-extrabold text-rose-400';
+                    const advantageTeam = pullDir < 0 ? this.teamKiriName : this.teamKananName;
+                    subtitleElem.textContent = `Kesempatan dimanfaatkan lawan! Tali tertarik 1 langkah ke arah ${advantageTeam}!`;
+                }
+
+                expContent.textContent = q.explanation;
+                modal.classList.remove('hidden');
+            }
+
+            nextQuestion() {
+                document.getElementById('explanation-modal').classList.add('hidden');
+
+                // Check Knockout Victory condition (Reached -5 or +5)
+                if (this.ropePosition <= -5 || this.ropePosition >= 5) {
+                    this.endGame();
+                    return;
+                }
+
+                this.currentQuestionIndex++;
+                this.renderQuestion();
+            }
+
+            endGame() {
+                this.isPlaying = false;
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('victory-screen').classList.remove('hidden');
+
+                const titleElem = document.getElementById('winner-title');
+                const reasonElem = document.getElementById('winner-reason');
+                const finalRopeElem = document.getElementById('final-rope-pos');
+                const finalRoundsElem = document.getElementById('final-rounds-count');
+
+                let winnerName = "";
+                let isKO = Math.abs(this.ropePosition) >= 5;
+
+                if (this.ropePosition < 0) {
+                    winnerName = this.teamKiriName;
+                    titleElem.textContent = `🏆 ${winnerName.toUpperCase()} MENANG!`;
+                    titleElem.className = "text-3xl sm:text-4xl font-extrabold text-blue-400 mb-2";
+                    reasonElem.textContent = isKO ? "Dominasi Mutlak (Knockout)!" : "Unggul Posisi Tali di Akhir Ronde!";
+                    finalRopeElem.textContent = `${this.ropePosition} (Sisi Kiri)`;
+                } else if (this.ropePosition > 0) {
+                    winnerName = this.teamKananName;
+                    titleElem.textContent = `🏆 ${winnerName.toUpperCase()} MENANG!`;
+                    titleElem.className = "text-3xl sm:text-4xl font-extrabold text-amber-400 mb-2";
+                    reasonElem.textContent = isKO ? "Dominasi Mutlak (Knockout)!" : "Unggul Posisi Tali di Akhir Ronde!";
+                    finalRopeElem.textContent = `+${this.ropePosition} (Sisi Kanan)`;
+                } else {
+                    titleElem.textContent = "⚖️ PERTANDINGAN SERI!";
+                    titleElem.className = "text-3xl sm:text-4xl font-extrabold text-slate-200 mb-2";
+                    reasonElem.textContent = "Kekuatan seimbang! Tali tepat di titik netral (0).";
+                    finalRopeElem.textContent = "0 (Tepat Di Tengah)";
+                }
+
+                const roundsCompleted = Math.min(5, Math.ceil((this.currentQuestionIndex + 1) / 2));
+                finalRoundsElem.textContent = `${roundsCompleted} Ronde`;
+
+                sound.victory();
+                confetti.start();
+            }
+
+            restart() {
+                confetti.stop();
+                document.getElementById('victory-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+        }
+
+        // Initialize Game Instance
+        const game = new TugOfWarGame();
+    </script>
+</body>
+</html>
