@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duel Otak Matematika</title>
+<style>
+:root{--purple:#6d28d9;--deep:#312e81;--cyan:#0891b2;--ink:#17213e;--muted:#6b7288;--line:#e5e7f4;--pale:#f7f5ff;--green:#15803d;--orange:#9a3412}
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:linear-gradient(135deg,#f5f3ff,#ecfeff);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+.app{max-width:850px;margin:0 auto}
+.hero{background:linear-gradient(135deg,var(--deep),var(--purple) 60%,var(--cyan));color:white;border-radius:22px;padding:26px 22px;position:relative;overflow:hidden}
+.eyebrow{font-size:11px;letter-spacing:2px;font-weight:800;opacity:.85}
+h1{font-size:clamp(29px,5vw,42px);font-weight:900;line-height:1.08;margin:10px 0}
+.sub{font-size:13px;opacity:.92;line-height:1.6;max-width:520px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
+.chip{background:#ffffff24;padding:6px 10px;border-radius:99px;font-size:11px}
+.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:19px;margin-top:15px;box-shadow:0 5px 20px #312e8110}
+.section-title{font-size:16px;font-weight:850;margin:0 0 12px}
+.muted{color:var(--muted);font-size:12px;line-height:1.6}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{border:2px solid #e4e4f2;background:#fafaff;border-radius:13px;padding:14px 10px;text-align:left;cursor:pointer;color:#25264c}
+.mode.active{border-color:#7c3aed;background:#f3e8ff}
+.mode strong{display:block;font-size:14px;margin:5px 0}
+.mode span{font-size:11px;color:var(--muted)}
+.field{width:100%;border:1px solid #d8d9e9;background:white;border-radius:10px;padding:12px;font:inherit;font-size:14px;color:var(--ink);min-width:0}
+.field:focus{outline:2px solid #a78bfa;border-color:var(--purple)}
+.primary,.secondary{border:0;border-radius:11px;padding:13px 18px;font-weight:800;cursor:pointer;font-size:14px}
+.primary{background:var(--purple);color:white;box-shadow:0 4px 0 #4c1d95}
+.primary:hover{background:#5b21b6}
+.secondary{background:#f3e8ff;color:var(--purple);border:1px solid #ddd6fe;padding:10px 12px;font-size:12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.notice{background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;padding:11px;border-radius:10px;font-size:12px;line-height:1.6}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.stat{background:#f7f6ff;border:1px solid #e9e5ff;padding:12px 8px;border-radius:12px;text-align:center}
+.value{font-size:22px;font-weight:900;color:#5b21b6}
+.label{font-size:10px;color:var(--muted);font-weight:700;margin-top:3px}
+.progress{height:7px;background:#e9e7f5;border-radius:99px;overflow:hidden;margin:10px 0}
+.progress div{height:100%;background:linear-gradient(90deg,#8b5cf6,#06b6d4);width:0%;transition:width .25s}
+.qbox{background:var(--pale);border:1px solid #e8e0ff;border-radius:15px;padding:19px 16px;margin:14px 0}
+.qtext{font-size:clamp(18px,3vw,23px);font-weight:850;line-height:1.5;white-space:pre-line}
+.tag{display:inline-block;border-radius:99px;background:#ede9fe;color:var(--purple);padding:4px 9px;font-size:10px;font-weight:850}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.option{border:2px solid #e4e4f0;background:white;color:#25264c;border-radius:12px;padding:14px 12px;text-align:left;cursor:pointer;font-size:14px;line-height:1.5;font-weight:650;min-height:57px;overflow-wrap:anywhere}
+.letter{display:inline-flex;align-items:center;justify-content:center;background:#ede9fe;color:var(--purple);width:26px;height:26px;border-radius:8px;font-size:12px;font-weight:900;margin-right:7px;vertical-align:middle}
+.option:hover:not(:disabled){border-color:#a78bfa;background:#faf5ff}
+.option.correct{border-color:#16a34a;background:#dcfce7;color:#166534}
+.option.wrong{border-color:#f59e0b;background:#fffbeb;color:#92400e}
+.option.eliminated{visibility:hidden;pointer-events:none}
+.timer-track{height:8px;background:#eee9fa;border-radius:99px;overflow:hidden;margin-top:14px}
+.timer-bar{height:100%;width:100%;background:#06b6d4;transition:width 1s linear}
+.timer-bar.urgent{background:#ef4444}
+.feedback{padding:12px 14px;border-radius:11px;margin-top:12px;font-size:13px;line-height:1.65}
+.feedback.good{background:#dcfce7;color:#166534}
+.feedback.bad{background:#fff7ed;color:#9a3412}
+.score-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #e8e7f3;padding:12px;border-radius:12px;margin-top:8px}
+.score-row.winner{border-color:#a78bfa;background:#f5f3ff}
+.score-num{font-weight:900;color:var(--purple);font-size:20px}
+.review{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:10px}
+.review h3{margin:0 0 6px;font-size:14px}
+.review p{font-size:12px;line-height:1.7;margin:5px 0;color:#4b5563}
+@keyframes pulse{0%{transform:scale(.98)}60%{transform:scale(1.015)}100%{transform:scale(1)}}
+.pulse{animation:pulse .45s ease-out}
+footer{text-align:center;padding:14px;color:var(--muted);font-size:11px}
+@media(max-width:480px){body{padding:10px}.hero{padding:21px 16px}.panel{padding:14px}.options{grid-template-columns:1fr}.option{min-height:48px;padding:11px}.stats{gap:5px}.value{font-size:19px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="hero">
+ <div class="eyebrow">ARENA KOMPETISI • MATEMATIKA SMK</div>
+ <h1>⚡ DUEL OTAK<br>MATEMATIKA</h1>
+ <div class="sub">Uji logika, pecahkan tantangan, kumpulkan poin, dan buktikan kemampuan matematikamu!</div>
+ <div class="chips"><span class="chip">🎯 15 Soal</span><span class="chip">⏱️ 20 Detik/Soal</span><span class="chip">🏆 100 Poin/Jawaban Benar</span></div>
+</header>
+
+<section id="setup" class="panel">
+ <h2 class="section-title">🎮 Siap memasuki arena?</h2>
+ <p class="muted">Pilih mode permainan dan siapkan nama pemain. Setiap soal memiliki empat pilihan jawaban.</p>
+ <div class="mode-grid">
+  <button class="mode active" data-mode="solo" type="button"><span style="font-size:23px">🧠</span><strong>Mode Individu</strong><span>Uji kemampuanmu sendiri</span></button>
+  <button class="mode" data-mode="team" type="button"><span style="font-size:23px">⚔️</span><strong>Mode Dua Tim</strong><span>Kompetisi bergiliran</span></button>
+ </div>
+ <div style="display:grid;gap:11px;margin-top:16px">
+  <label for="player1" style="font-size:12px;font-weight:800">Nama pemain / Tim A</label>
+  <input id="player1" class="field" maxlength="30" value="Pemain" placeholder="Masukkan nama pemain atau tim">
+  <div id="secondWrap" class="hidden"><label for="player2" style="display:block;font-size:12px;font-weight:800;margin-bottom:7px">Nama Tim B</label><input id="player2" class="field" maxlength="30" value="Tim Beta" placeholder="Masukkan nama tim kedua"></div>
+ </div>
+ <div class="notice" style="margin-top:14px">💡 <b>Aturan bantuan:</b> Setiap pemain atau tim mendapat satu kesempatan bantuan untuk menghilangkan dua pilihan yang salah.</div>
+ <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap"><span class="muted">Materi: Aljabar, Fungsi Kuadrat, Barisan &amp; Deret, Peluang</span><button id="startBtn" class="primary" type="button">MULAI DUEL →</button></div>
+</section>
+
+<section id="arena" class="hidden">
+ <div class="stats">
+  <div class="stat"><div id="roundStat" class="value">01/15</div><div class="label">NOMOR SOAL</div></div>
+  <div class="stat"><div id="scoreStat" class="value">0</div><div class="label">POIN PEMAIN AKTIF</div></div>
+  <div class="stat"><div id="timerStat" class="value">20s</div><div class="label">WAKTU TERSISA</div></div>
+ </div>
+ <div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><span id="category" class="tag">OPERASI ALJABAR</span><span id="turnLabel" style="font-size:12px;font-weight:850;color:#6d28d9">Giliran: Pemain</span></div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <div style="display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#6b7288"><span>Perjalanan menuju kemenangan</span><span id="progressText">Soal 1 dari 15</span></div>
+  <div class="qbox"><div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#7c3aed;margin-bottom:10px">PERTANYAAN</div><div id="question" class="qtext"></div></div>
+  <div id="options" class="options"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px"><button id="hintBtn" class="secondary" type="button">🪄 Bantuan 50:50</button><span class="muted">Jawaban benar = +100 poin</span></div>
+  <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
+  <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+  <div id="nextWrap" class="hidden" style="text-align:right;margin-top:14px"><button id="nextBtn" class="primary" type="button">SOAL BERIKUTNYA →</button></div>
+ </div>
+ <div class="panel"><h2 class="section-title">🏆 Papan Skor</h2><div id="scoreboard"></div><p class="muted">Tetap semangat! Setiap soal adalah kesempatan untuk belajar.</p></div>
+</section>
+
+<section id="results" class="hidden">
+ <div id="resultHero" class="hero" style="margin-top:15px"><div class="eyebrow">DUEL SELESAI</div><h2 style="font-size:30px;margin:10px 0">🏆 HASIL PERTANDINGAN</h2><div id="winnerText" class="sub"></div></div>
+ <div id="finalStats" class="stats"></div>
+ <div class="panel"><h2 class="section-title">📊 Peringkat Akhir</h2><div id="finalBoard"></div></div>
+ <div class="panel"><h2 class="section-title">📚 Pembahasan 15 Soal</h2><p class="muted">Pelajari kembali langkah penyelesaian agar konsep matematika semakin dipahami.</p><div id="reviewList"></div></div>
+ <div class="panel"><h2 class="section-title">🌟 Terus Berkembang!</h2><p class="muted">Hasil permainan merupakan kesempatan untuk mengetahui materi yang sudah dikuasai dan materi yang masih perlu dilatih. Apresiasi setiap usaha dan kemajuan.</p><button id="restartBtn" class="primary" type="button" style="width:100%;margin-top:10px">↻ MAIN LAGI</button></div>
+</section>
+<div id="liveMessage" class="muted" aria-live="polite" style="text-align:center;padding:12px"></div>
+<footer>Duel Otak Matematika • Media latihan interaktif untuk siswa SMK kelas X</footer>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const questions = [
+ {cat:'Operasi Aljabar',q:'Sederhanakan bentuk 3x + 5x − 2x.',o:['4x','6x','10x','6x²'],a:1,e:'Gabungkan suku sejenis: (3 + 5 − 2)x = 6x.'},
+ {cat:'Operasi Aljabar',q:'Jika 2x − 7 = 13, berapakah nilai x?',o:['3','7','10','20'],a:2,e:'Tambahkan 7 pada kedua ruas: 2x = 20. Bagi 2, sehingga x = 10.'},
+ {cat:'Operasi Aljabar',q:'Hasil perkalian (x + 3)(x + 2) adalah ....',o:['x² + 5x + 6','x² + 6x + 5','x² + x + 6','x² + 5'],a:0,e:'Kalikan setiap suku: x² + 2x + 3x + 6 = x² + 5x + 6.'},
+ {cat:'Operasi Aljabar',q:'Jika 3a + 2 = 17, nilai 2a − 1 adalah ....',o:['7','9','10','11'],a:1,e:'3a = 15, maka a = 5. Jadi 2a − 1 = 10 − 1 = 9.'},
+ {cat:'Fungsi Kuadrat',q:'Arah buka grafik fungsi y = −2x² + 3x + 1 adalah ....',o:['Ke atas','Ke bawah','Ke kanan','Selalu mendatar'],a:1,e:'Koefisien x² adalah a = −2. Karena a < 0, parabola terbuka ke bawah.'},
+ {cat:'Fungsi Kuadrat',q:'Titik puncak fungsi y = (x − 2)² + 3 adalah ....',o:['(−2, 3)','(2, −3)','(2, 3)','(−2, −3)'],a:2,e:'Bentuk puncak y = (x − h)² + k memiliki titik puncak (h, k). Jadi titik puncaknya (2, 3).'},
+ {cat:'Fungsi Kuadrat',q:'Akar-akar persamaan x² − 5x + 6 = 0 adalah ....',o:['1 dan 6','−2 dan −3','2 dan 3','−1 dan −6'],a:2,e:'Faktorkan menjadi (x − 2)(x − 3) = 0. Jadi x = 2 atau x = 3.'},
+ {cat:'Barisan dan Deret',q:'Barisan 4, 7, 10, 13, ... memiliki beda ....',o:['2','3','4','7'],a:1,e:'Beda barisan aritmetika adalah selisih dua suku berurutan: 7 − 4 = 3.'},
+ {cat:'Barisan dan Deret',q:'Suku ke-10 barisan aritmetika 2, 5, 8, 11, ... adalah ....',o:['26','27','29','30'],a:2,e:'Rumus suku ke-n: Un = a + (n − 1)b. U10 = 2 + 9(3) = 29.'},
+ {cat:'Barisan dan Deret',q:'Jumlah 5 suku pertama deret 2 + 4 + 6 + 8 + ... adalah ....',o:['20','25','30','32'],a:2,e:'Lima suku pertama adalah 2, 4, 6, 8, 10. Jumlahnya 2 + 4 + 6 + 8 + 10 = 30.'},
+ {cat:'Barisan dan Deret',q:'Barisan geometri 3, 6, 12, 24, ... memiliki rasio ....',o:['2','3','4','6'],a:0,e:'Rasio diperoleh dengan membagi suku berurutan: 6 ÷ 3 = 2.'},
+ {cat:'Peluang',q:'Sebuah dadu bersisi enam dilempar sekali. Peluang muncul angka genap adalah ....',o:['1/6','1/3','1/2','2/3'],a:2,e:'Angka genap adalah 2, 4, dan 6. Peluang = 3/6 = 1/2.'},
+ {cat:'Peluang',q:'Sebuah koin seimbang dilempar sekali. Peluang muncul sisi gambar adalah ....',o:['0','1/4','1/2','1'],a:2,e:'Koin memiliki dua hasil yang sama mungkin, yaitu angka dan gambar. Peluang gambar = 1/2.'},
+ {cat:'Peluang',q:'Dalam kotak terdapat 3 bola merah dan 2 bola biru. Satu bola diambil secara acak. Peluang terambil bola biru adalah ....',o:['2/5','3/5','1/2','2/3'],a:0,e:'Total bola = 3 + 2 = 5. Bola biru ada 2, sehingga peluangnya 2/5.'},
+ {cat:'Peluang',q:'Dua dadu bersisi enam dilempar bersama. Peluang jumlah kedua mata dadu sama dengan 7 adalah ....',o:['1/12','1/6','1/4','1/3'],a:1,e:'Ada 6 pasangan yang jumlahnya 7: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1). Total hasil = 36. Peluang = 6/36 = 1/6.'}
+];
+const letters=['A','B','C','D'];
+let mode='solo',players=[],turn=0,index=0,remaining=20,timer=null,locked=false,usedHints=[],history=[],finished=false;
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function stopTimer(){if(timer!==null){clearInterval(timer);timer=null;}}
+function setMode(m){
+ mode=m;
+ document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+ $('secondWrap').classList.toggle('hidden',m!=='team');
+ $('player1').value=m==='solo'?'Pemain':'Tim Alpha';
+}
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+function begin(){
+ stopTimer();
+ const n1=$('player1').value.trim()||(mode==='solo'?'Pemain':'Tim Alpha');
+ const n2=$('player2').value.trim()||'Tim Beta';
+ players=mode==='solo'?[{name:n1,score:0,correct:0,answered:0}]:[{name:n1,score:0,correct:0,answered:0},{name:n2,score:0,correct:0,answered:0}];
+ turn=0;index=0;remaining=20;locked=false;usedHints=players.map(()=>false);history=[];finished=false;
+ $('setup').classList.add('hidden');$('results').classList.add('hidden');$('arena').classList.remove('hidden');$('liveMessage').textContent='';
+ renderQuestion();
+}
+function renderBoard(target,final=false){
+ const ranked=players.map((p,i)=>({...p,original:i})).sort((a,b)=>b.score-a.score);
+ target.innerHTML=ranked.map((p,i)=>`<div class="score-row ${final&&i===0?'winner':''}"><div><div style="font-weight:850;font-size:13px">${i===0?'🏆 ':''}${esc(p.name)}</div><div class="muted">${p.correct} jawaban benar · ${p.answered} dijawab</div></div><div class="score-num">${p.score}</div></div>`).join('');
+}
+function renderQuestion(){
+ if(index>=questions.length){endGame();return;}
+ stopTimer();locked=false;remaining=20;
+ const q=questions[index],p=players[turn];
+ $('roundStat').textContent=String(index+1).padStart(2,'0')+'/15';
+ $('scoreStat').textContent=p.score;
+ $('timerStat').textContent='20s';
+ $('category').textContent=q.cat.toUpperCase();
+ $('turnLabel').textContent=mode==='team'?'Giliran: '+p.name:p.name;
+ $('progressBar').style.width=(index/questions.length*100)+'%';
+ $('progressText').textContent='Soal '+(index+1)+' dari 15';
+ $('question').textContent=q.q;
+ $('feedback').className='feedback hidden';$('feedback').textContent='';
+ $('nextWrap').classList.add('hidden');
+ $('hintBtn').disabled=usedHints[turn];
+ $('hintBtn').textContent=usedHints[turn]?'✓ Bantuan digunakan':'🪄 Bantuan 50:50';
+ $('options').innerHTML=q.o.map((o,i)=>`<button type="button" class="option" data-answer="${i}"><span class="letter">${letters[i]}</span>${esc(o)}</button>`).join('');
+ $('options').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>answer(Number(b.dataset.answer))));
+ renderBoard($('scoreboard'));
+ updateTimer();
+ timer=setInterval(()=>{remaining--;updateTimer();if(remaining<=0){stopTimer();answer(null);}},1000);
+}
+function updateTimer(){
+ $('timerStat').textContent=remaining+'s';
+ $('timerBar').style.width=(remaining/20*100)+'%';
+ $('timerBar').classList.toggle('urgent',remaining<=5);
+}
+function answer(choice){
+ if(locked||finished)return;
+ locked=true;stopTimer();
+ const q=questions[index],p=players[turn],correct=choice===q.a;
+ p.answered++;
+ if(correct){p.correct++;p.score+=100;}
+ history.push({q,choice,correct,player:turn,timedOut:choice===null});
+ $('options').querySelectorAll('button').forEach((b,i)=>{
+  b.disabled=true;
+  if(i===q.a)b.classList.add('correct');
+  else if(i===choice)b.classList.add('wrong');
+ });
+ $('scoreStat').textContent=p.score;
+ $('feedback').className='feedback '+(correct?'good':'bad');
+ $('feedback').innerHTML=choice===null?`⏰ Waktu habis. Jawaban yang benar adalah <b>${letters[q.a]}. ${esc(q.o[q.a])}</b>.<br>${esc(q.e)}`:correct?`🎉 <b>Tepat sekali! +100 poin!</b><br>${esc(q.e)}`:`💡 <b>Belum tepat, tetap semangat!</b> Jawaban benar: <b>${letters[q.a]}. ${esc(q.o[q.a])}</b>.<br>${esc(q.e)}`;
+ $('nextBtn').textContent=index===14?'LIHAT HASIL AKHIR 🏆':'SOAL BERIKUTNYA →';
+ $('nextWrap').classList.remove('hidden');
+ renderBoard($('scoreboard'));
+ $('liveMessage').textContent=correct?'Hebat! Jawaban benar, skor bertambah 100 poin.':'Tetap semangat, kesempatan belajar selalu terbuka.';
+ if(correct){$('feedback').classList.add('pulse');}
+}
+function useHint(){
+ if(locked||usedHints[turn])return;
+ usedHints[turn]=true;
+ const q=questions[index],wrong=[0,1,2,3].filter(i=>i!==q.a);
+ const keep=wrong[(index+turn)%wrong.length];
+ $('options').querySelectorAll('button').forEach((b,i)=>{if(i!==q.a&&i!==keep)b.classList.add('eliminated');});
+ $('hintBtn').disabled=true;$('hintBtn').textContent='✓ Bantuan digunakan';
+ $('liveMessage').textContent='Bantuan digunakan: dua pilihan yang salah telah dieliminasi.';
+}
+function next(){
+ if(!locked)return;
+ index++;
+ if(mode==='team')turn=(turn+1)%2;
+ if(index>=questions.length){endGame();return;}
+ renderQuestion();
+}
+function endGame(){
+ stopTimer();finished=true;
+ $('arena').classList.add('hidden');$('results').classList.remove('hidden');
+ const sorted=players.map((p,i)=>({...p,original:i})).sort((a,b)=>b.score-a.score);
+ let winner;
+ if(players.length===1)winner='Permainan selesai, '+players[0].name+' meraih '+players[0].score+' poin!';
+ else if(sorted[0].score===sorted[1].score)winner='Hasil imbang! '+sorted[0].name+' dan '+sorted[1].name+' sama kuat dengan '+sorted[0].score+' poin.';
+ else winner='Selamat kepada '+sorted[0].name+' yang menjadi pemenang dengan '+sorted[0].score+' poin!';
+ $('winnerText').textContent=winner;
+ const totalCorrect=players.reduce((s,p)=>s+p.correct,0),totalAnswered=players.reduce((s,p)=>s+p.answered,0);
+ const pct=totalAnswered?Math.round(totalCorrect/totalAnswered*100):0;
+ $('finalStats').innerHTML=`<div class="stat"><div class="value">${players.reduce((s,p)=>s+p.score,0)}</div><div class="label">TOTAL POIN</div></div><div class="stat"><div class="value">${pct}%</div><div class="label">AKURASI JAWABAN</div></div><div class="stat"><div class="value">${totalCorrect}/${totalAnswered}</div><div class="label">JAWABAN BENAR</div></div>`;
+ renderBoard($('finalBoard'),true);
+ $('reviewList').innerHTML=questions.map((q,i)=>{
+  const h=history[i],choice=h?h.choice:null,label=choice===null?'Tidak dijawab':letters[choice]+'. '+q.o[choice],ok=h&&h.correct;
+  return `<article class="review"><h3>${i+1}. ${esc(q.q)}</h3><span class="tag">${esc(q.cat)}</span><p>Jawabanmu: <b style="color:${ok?'#15803d':'#b45309'}">${esc(label)}</b></p><p>Jawaban benar: <b>${letters[q.a]}. ${esc(q.o[q.a])}</b></p><p><b>Pembahasan:</b> ${esc(q.e)}</p></article>`;
+ }).join('');
+ $('liveMessage').textContent='Permainan selesai. Hasil dan pembahasan semua soal tersedia di bawah.';
+ $('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('startBtn').addEventListener('click',begin);
+$('hintBtn').addEventListener('click',useHint);
+$('nextBtn').addEventListener('click',next);
+$('restartBtn').addEventListener('click',()=>{
+ stopTimer();$('results').classList.add('hidden');$('arena').classList.add('hidden');$('setup').classList.remove('hidden');$('liveMessage').textContent='Pilih mode dan mulai duel baru.';
+ $('setup').scrollIntoView({behavior:'smooth',block:'start'});
+});
+})();
+</script>
+</body>
+</html>
