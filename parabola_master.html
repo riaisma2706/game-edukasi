@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parabola Master: Petualangan Grafik Fungsi Kuadrat</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    colors: {
+                        arcade: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            accent: '#6366f1',
+                            accentHover: '#4f46e5',
+                            gold: '#fbbf24',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            cyan: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+        }
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .arcade-btn {
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.3);
+        }
+        .arcade-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.3);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        /* Pulse Animation */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.8); }
+        }
+        .glow-effect {
+            animation: pulseGlow 2.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-100">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="w-full bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMode('menu')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-mono font-bold">f(x)</i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg md:text-xl tracking-tight bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+                        PARABOLA MASTER
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium hidden sm:block">Pembelajaran Grafik Fungsi Kuadrat Interaktif</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-2 md:gap-3">
+                <button id="navBtnArcade" onclick="switchMode('arcade')" class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-2 shadow-md">
+                    <i class="fa-solid fa-gamepad text-amber-300"></i> Kuis Arcade
+                </button>
+                <button id="navBtnSandbox" onclick="switchMode('sandbox')" class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-cyan-400"></i> Eksplorasi
+                </button>
+                <button id="audioToggleBtn" onclick="toggleAudio()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-center transition" title="Efek Suara">
+                    <i id="audioIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- ================= MAIN MENU SCREEN ================= -->
+        <section id="menuScreen" class="py-6 flex flex-col items-center justify-center text-center space-y-8">
+            <div class="max-w-2xl space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+                    <i class="fa-solid fa-graduation-cap"></i> SMK / SMA Matematika Kelas X
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                    Kuasai Kurva Parabola <br>
+                    <span class="bg-gradient-to-r from-amber-400 via-rose-400 to-indigo-400 bg-clip-text text-transparent">
+                        $y = ax^2 + bx + c$
+                    </span>
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base leading-relaxed">
+                    Petualangan interaktif memahami keterbukaan kurva, titik puncak, sumbu simetri, diskriminan, dan titik potong sumbu melalui kuis arcade & laboratorium visual interaktif!
+                </p>
+            </div>
+
+            <!-- Mode Selection Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl pt-4">
+                <!-- Arcade Mode Card -->
+                <div onclick="switchMode('arcade')" class="group glass-panel rounded-2xl p-6 sm:p-8 text-left cursor-pointer hover:border-indigo-500/60 transition duration-300 glow-effect flex flex-col justify-between space-y-6">
+                    <div class="space-y-3">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-indigo-400 transition">Mode Kuis Arcade</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm">
+                            Tantang dirimu dengan 4 tingkatan level bertahap! Lengkap dengan timer, nyawa (❤️), skor combo multiplier, dan pembahasan rumus instan.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-700/50 text-xs font-semibold text-indigo-400">
+                        <span>4 Level Soal Bertingkat</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition duration-300"></i>
+                    </div>
+                </div>
+
+                <!-- Sandbox Mode Card -->
+                <div onclick="switchMode('sandbox')" class="group glass-panel rounded-2xl p-6 sm:p-8 text-left cursor-pointer hover:border-cyan-500/60 transition duration-300 flex flex-col justify-between space-y-6">
+                    <div class="space-y-3">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-600/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-flask"></i>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-cyan-400 transition">Mode Eksplorasi / Sandbox</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm">
+                            Geser slider koefisien $a$, $b$, dan $c$ secara realtime. Amati perubahan bentuk parabola, nilai diskriminan $D$, dan titik puncak secara instan!
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-700/50 text-xs font-semibold text-cyan-400">
+                        <span>Laboratorium Visual Real-time</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition duration-300"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= ARCADE QUIZ SCREEN ================= -->
+        <section id="arcadeScreen" class="hidden flex-col space-y-4">
+            
+            <!-- Arcade Game HUD Header -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 border border-slate-800">
+                <!-- Level Badge & Title -->
+                <div class="flex items-center gap-3">
+                    <div class="px-3 py-1 rounded-lg bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-layer-group"></i> <span id="hudLevelBadge">Level 1</span>
+                    </div>
+                    <div>
+                        <h3 id="hudLevelTitle" class="font-bold text-slate-100 text-sm md:text-base">Arah Keterbukaan Kurva</h3>
+                        <p class="text-xs text-slate-400">Soal <span id="hudCurrentQ">1</span> dari <span id="hudTotalQ">4</span></p>
+                    </div>
+                </div>
+
+                <!-- Stats: Lives, Combo, Score, Timer -->
+                <div class="flex items-center gap-4 sm:gap-6 ml-auto">
+                    <!-- Lives -->
+                    <div class="flex items-center gap-1 text-rose-500 text-lg" id="hudLives">
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+
+                    <!-- Combo Multiplier -->
+                    <div class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+                        <i class="fa-solid fa-bolt"></i> <span id="hudCombo">Combo x1</span>
+                    </div>
+
+                    <!-- Score -->
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Skor</div>
+                        <div id="hudScore" class="font-mono text-xl font-extrabold text-cyan-400">0000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700/50">
+                <div id="quizTimerBar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full w-full transition-all duration-100 ease-linear"></div>
+            </div>
+
+            <!-- Arcade Main Layout (Graph Canvas + Question Card) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left: Canvas Box -->
+                <div class="lg:col-span-6 glass-panel rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden min-h-[320px] sm:min-h-[380px]">
+                    <div class="absolute top-3 left-3 bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-700 text-xs font-mono text-cyan-300 flex items-center gap-1.5 z-10">
+                        <i class="fa-solid fa-chart-line"></i> Grafik Canvas Kartesius
+                    </div>
+                    <canvas id="quizCanvas" class="w-full h-full max-h-[380px] rounded-xl bg-slate-950 border border-slate-800 cursor-crosshair"></canvas>
+                </div>
+
+                <!-- Right: Question & Options Panel -->
+                <div class="lg:col-span-6 glass-panel rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-6">
+                    
+                    <!-- Question Prompt Box -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs font-semibold text-slate-400">
+                            <span id="qCategoryTag" class="text-indigo-400 uppercase tracking-wider">Kategori: Konsep Dasar</span>
+                            <span id="qTimerText" class="font-mono text-amber-400 font-bold"><i class="fa-regular fa-clock"></i> 25s</span>
+                        </div>
+                        <h3 id="questionText" class="text-base sm:text-lg font-bold text-white leading-relaxed">
+                            Memuat pertanyaan...
+                        </h3>
+                    </div>
+
+                    <!-- Multiple Choice Options -->
+                    <div id="optionsContainer" class="grid grid-cols-1 gap-3">
+                        <!-- Options generated via JS -->
+                    </div>
+
+                    <!-- Step-by-Step Feedback / Explanation Box (Hidden by default) -->
+                    <div id="feedbackContainer" class="hidden rounded-xl p-4 space-y-3 border transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div id="feedbackTitle" class="font-bold text-sm sm:text-base flex items-center gap-2">
+                                <!-- Status Title -->
+                            </div>
+                            <span id="scoreBonusTag" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-bold">+150 pts</span>
+                        </div>
+
+                        <!-- Step by Step Math Solution -->
+                        <div class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2 border-t border-slate-700/50 pt-2">
+                            <div class="font-semibold text-indigo-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-lightbulb text-amber-400"></i> Pembahasan Langkah Demi Langkah:
+                            </div>
+                            <div id="feedbackExplanation" class="font-sans bg-slate-900/80 p-3 rounded-lg border border-slate-800 space-y-1 font-normal">
+                                <!-- Math step explanation generated dynamically -->
+                            </div>
+                        </div>
+
+                        <button id="nextQuestionBtn" onclick="nextQuestion()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition arcade-btn flex items-center justify-center gap-2">
+                            <span>Soal Berikutnya</span> <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SANDBOX / EXPLORATION SCREEN ================= -->
+        <section id="sandboxScreen" class="hidden flex-col space-y-6">
+            
+            <div class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-cyan-400"></i> Laboratorium Eksplorasi Grafik
+                    </h2>
+                    <p class="text-xs text-slate-400">Ubah nilai koefisien $a$, $b$, dan $c$ untuk mengamati transformasi parabola secara eksploratif.</p>
+                </div>
+                <!-- Presets Dropdown/Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setSandboxPreset(1, 0, -4)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition">
+                        $y = x^2 - 4$
+                    </button>
+                    <button onclick="setSandboxPreset(-1, 2, 3)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 transition">
+                        $y = -x^2 + 2x + 3$
+                    </button>
+                    <button onclick="setSandboxPreset(1, -4, 4)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition">
+                        Menyinggung X ($D=0$)
+                    </button>
+                    <button onclick="setSandboxPreset(1, 2, 5)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 transition">
+                        Melayang ($D<0$)
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left Column: Controls Sliders -->
+                <div class="lg:col-span-4 glass-panel rounded-2xl p-5 space-y-5 border border-slate-800">
+                    <h3 class="font-bold text-sm text-slate-200 border-b border-slate-700/60 pb-2 flex items-center justify-between">
+                        <span>Pengaturan Koefisien</span>
+                        <span id="sbEquationDisplay" class="font-mono text-cyan-400 text-xs bg-slate-900 px-2 py-1 rounded">y = x²</span>
+                    </h3>
+
+                    <!-- Slider A -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="sliderA" class="font-semibold text-slate-300">Koefisien a (Keterbukaan)</label>
+                            <span id="valA" class="font-mono font-bold text-indigo-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">1.0</span>
+                        </div>
+                        <input type="range" id="sliderA" min="-5" max="5" step="0.5" value="1" oninput="updateSandbox()" class="w-full accent-indigo-500 cursor-pointer">
+                        <p class="text-[11px] text-slate-400">a > 0 (terbuka ke atas), a < 0 (terbuka ke bawah)</p>
+                    </div>
+
+                    <!-- Slider B -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="sliderB" class="font-semibold text-slate-300">Koefisien b (Pergeseran Sumbu)</label>
+                            <span id="valB" class="font-mono font-bold text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">0.0</span>
+                        </div>
+                        <input type="range" id="sliderB" min="-10" max="10" step="0.5" value="0" oninput="updateSandbox()" class="w-full accent-cyan-500 cursor-pointer">
+                        <p class="text-[11px] text-slate-400">Menggeser posisi puncak secara horizontal & vertikal</p>
+                    </div>
+
+                    <!-- Slider C -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="sliderC" class="font-semibold text-slate-300">Konstanta c (Titik Potong Y)</label>
+                            <span id="valC" class="font-mono font-bold text-emerald-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">-4.0</span>
+                        </div>
+                        <input type="range" id="sliderC" min="-10" max="10" step="0.5" value="-4" oninput="updateSandbox()" class="w-full accent-emerald-500 cursor-pointer">
+                        <p class="text-[11px] text-slate-400">Titik potong grafik dengan sumbu Y di (0, c)</p>
+                    </div>
+
+                    <!-- Toggle Visual Helpers -->
+                    <div class="pt-3 border-t border-slate-700/60 space-y-2 text-xs">
+                        <div class="font-semibold text-slate-300 mb-1">Tampilkan Elemen Grafik:</div>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="chkVertex" checked onchange="updateSandbox()" class="accent-indigo-500 rounded">
+                            Titik Puncak & Sumbu Simetri
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="chkYInt" checked onchange="updateSandbox()" class="accent-emerald-500 rounded">
+                            Titik Potong Sumbu Y
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="chkXInt" checked onchange="updateSandbox()" class="accent-amber-500 rounded">
+                            Titik Potong Sumbu X (Akar-akar)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Middle Column: Interactive Sandbox Canvas -->
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="glass-panel rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden min-h-[380px]">
+                        <canvas id="sandboxCanvas" class="w-full h-full max-h-[420px] rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                    </div>
+
+                    <!-- Right/Bottom: Live Analytical Calculation Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        
+                        <!-- Card D -->
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Diskriminan ($D$)</div>
+                            <div id="sbValD" class="font-mono text-base font-extrabold text-amber-400">D = 16.0</div>
+                            <div id="sbInfoD" class="text-[11px] text-slate-300">Memotong X di 2 titik</div>
+                        </div>
+
+                        <!-- Card Vertex -->
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Titik Puncak ($x_p, y_p$)</div>
+                            <div id="sbValVertex" class="font-mono text-base font-extrabold text-indigo-400">(0.0, -4.0)</div>
+                            <div id="sbInfoVertex" class="text-[11px] text-slate-300">Titik Minimum</div>
+                        </div>
+
+                        <!-- Card Axis of Symmetry -->
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sumbu Simetri</div>
+                            <div id="sbValAxis" class="font-mono text-base font-extrabold text-cyan-400">x = 0.00</div>
+                            <div class="text-[11px] text-slate-300">Formula: $x = -b / 2a$</div>
+                        </div>
+
+                        <!-- Card Roots -->
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Titik Potong Sumbu X</div>
+                            <div id="sbValRoots" class="font-mono text-xs font-bold text-emerald-400">(-2.0, 0), (2.0, 0)</div>
+                            <div id="sbInfoRoots" class="text-[11px] text-slate-300">Akar Real</div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-slate-950 border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>
+                Parabola Master &copy; 2026 - Game Edukasi Pembelajaran Matematika Grafik Fungsi Kuadrat
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="hover:text-slate-300 transition cursor-pointer" onclick="switchMode('menu')">Menu Utama</span>
+                <span class="hover:text-slate-300 transition cursor-pointer" onclick="switchMode('arcade')">Kuis Arcade</span>
+                <span class="hover:text-slate-300 transition cursor-pointer" onclick="switchMode('sandbox')">Eksplorasi</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ================= MODALS / OVERLAYS ================= -->
+
+    <!-- LEVEL COMPLETE MODAL -->
+    <div id="levelCompleteModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 text-center space-y-5 border border-indigo-500/40 shadow-2xl animate-bounce-short">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center text-3xl font-black mx-auto shadow-lg shadow-amber-500/30">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            
+            <div class="space-y-1">
+                <h3 class="text-2xl font-extrabold text-white">LEVEL SELESAI!</h3>
+                <p id="lcLevelName" class="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Level 1: Keterbukaan Kurva</p>
+            </div>
+
+            <!-- Star Rating -->
+            <div class="flex justify-center items-center gap-2 text-2xl text-amber-400 py-1" id="lcStars">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <!-- Score breakdown table -->
+            <div class="bg-slate-900/90 rounded-xl p-4 space-y-2 text-xs border border-slate-800">
+                <div class="flex justify-between text-slate-400">
+                    <span>Skor Level Ini:</span>
+                    <span id="lcLevelScore" class="font-mono text-white font-bold">450</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>Akurasi Jawaban:</span>
+                    <span id="lcAccuracy" class="font-mono text-emerald-400 font-bold">100%</span>
+                </div>
+                <div class="flex justify-between text-slate-400 border-t border-slate-800 pt-2 font-bold text-sm">
+                    <span class="text-slate-200">Total Skor Arcade:</span>
+                    <span id="lcTotalScore" class="font-mono text-amber-400">1,250</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="retryLevel()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition">
+                    <i class="fa-solid fa-rotate-right"></i> Ulangi Level
+                </button>
+                <button id="lcNextBtn" onclick="nextLevel()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs arcade-btn transition">
+                    Lanjut Level <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="gameOverModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 text-center space-y-5 border border-rose-500/40 shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-rose-500/20 text-rose-500 border border-rose-500/40 flex items-center justify-center text-3xl font-black mx-auto">
+                <i class="fa-solid fa-heart-crack"></i>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="text-2xl font-extrabold text-white">GAME OVER</h3>
+                <p class="text-xs text-slate-400">Nyawa kamu telah habis! Jangan berkecil hati, terus berlatih.</p>
+            </div>
+
+            <div class="bg-slate-900/90 rounded-xl p-4 space-y-2 text-xs border border-slate-800">
+                <div class="flex justify-between text-slate-400">
+                    <span>Skor Akhir Terkumpul:</span>
+                    <span id="goFinalScore" class="font-mono text-amber-400 font-bold text-sm">850</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>Tingkat Kesulitan Terakhir:</span>
+                    <span id="goLevelReached" class="font-mono text-indigo-300 font-bold">Level 2</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="switchMode('menu')" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition">
+                    <i class="fa-solid fa-house"></i> Menu Utama
+                </button>
+                <button onclick="restartArcade()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs arcade-btn transition">
+                    <i class="fa-solid fa-rotate-right"></i> Main Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        /* ================= AUDIO SYNTH ENGINE (Web Audio API) ================= */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            }
+
+            play(type) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+
+                const now = this.ctx.currentTime;
+                try {
+                    if (type === 'correct') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, now); // C5
+                        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.35);
+                    } else if (type === 'wrong') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(180, now);
+                        osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.3);
+                    } else if (type === 'combo') {
+                        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'triangle';
+                            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+                            gain.gain.setValueAtTime(0.18, now + i * 0.07);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.18);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.start(now + i * 0.07);
+                            osc.stop(now + i * 0.07 + 0.18);
+                        });
+                    } else if (type === 'click') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.frequency.setValueAtTime(600, now);
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.04);
+                    } else if (type === 'levelcomplete') {
+                        [440, 554.37, 659.25, 880].forEach((freq, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, now + i * 0.1);
+                            gain.gain.setValueAtTime(0.2, now + i * 0.1);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.start(now + i * 0.1);
+                            osc.stop(now + i * 0.1 + 0.35);
+                        });
+                    } else if (type === 'gameover') {
+                        [320, 270, 220, 170].forEach((freq, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(freq, now + i * 0.14);
+                            gain.gain.setValueAtTime(0.2, now + i * 0.14);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.25);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.start(now + i * 0.14);
+                            osc.stop(now + i * 0.14 + 0.25);
+                        });
+                    }
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        function toggleAudio() {
+            sound.enabled = !sound.enabled;
+            const icon = document.getElementById('audioIcon');
+            if (sound.enabled) {
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-rose-400';
+            }
+        }
+
+
+        /* ================= MATHEMATICAL MATH HELPERS ================= */
+        function formatEquation(a, b, c) {
+            let str = "";
+            if (a === 1) str += "x²";
+            else if (a === -1) str += "-x²";
+            else str += a + "x²";
+
+            if (b > 0) str += (b === 1 ? " + x" : ` + ${b}x`);
+            else if (b < 0) str += (b === -1 ? " - x" : ` - ${Math.abs(b)}x`);
+
+            if (c > 0) str += ` + ${c}`;
+            else if (c < 0) str += ` - ${Math.abs(c)}`;
+
+            return str || "0";
+        }
+
+
+        /* ================= CANVAS CARTESIAN GRAPH RENDERER ================= */
+        function renderParabolaCanvas(canvasId, a, b, c, options = {}) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            // DPI adjustment for high-resolution screens
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            // Coordinate System Limits
+            const xMin = options.xMin || -8;
+            const xMax = options.xMax || 8;
+            const yMin = options.yMin || -8;
+            const yMax = options.yMax || 8;
+
+            // Map Cartesian math coordinates to Canvas pixel coordinates
+            function toPxX(x) {
+                return ((x - xMin) / (xMax - xMin)) * width;
+            }
+            function toPxY(y) {
+                return height - ((y - yMin) / (yMax - yMin)) * height;
+            }
+
+            // Clear Background
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Grid Lines
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 1;
+
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+                const px = toPxX(x);
+                ctx.beginPath();
+                ctx.moveTo(px, 0);
+                ctx.lineTo(px, height);
+                ctx.stroke();
+            }
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+                const py = toPxY(y);
+                ctx.beginPath();
+                ctx.moveTo(0, py);
+                ctx.lineTo(width, py);
+                ctx.stroke();
+            }
+
+            // Draw X and Y Axes
+            ctx.strokeStyle = "#64748b";
+            ctx.lineWidth = 2;
+            const originX = toPxX(0);
+            const originY = toPxY(0);
+
+            // X axis
+            ctx.beginPath();
+            ctx.moveTo(0, originY);
+            ctx.lineTo(width, originY);
+            ctx.stroke();
+
+            // Y axis
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, height);
+            ctx.stroke();
+
+            // Axis Numbering / Labels
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "10px Poppins, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x += 2) {
+                if (x === 0) continue;
+                const px = toPxX(x);
+                ctx.fillText(x.toString(), px, originY + 4);
+            }
+
+            ctx.textAlign = "right";
+            ctx.textBaseline = "middle";
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y += 2) {
+                if (y === 0) continue;
+                const py = toPxY(y);
+                ctx.fillText(y.toString(), originX - 5, py);
+            }
+
+            // Calculations for Key Features
+            const xp = -b / (2 * a);
+            const D = b * b - 4 * a * c;
+            const yp = -D / (4 * a);
+
+            // Draw Dashed Axis of Symmetry (if enabled)
+            if (options.showVertex !== false) {
+                const pxp = toPxX(xp);
+                ctx.save();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = "#f43f5e"; // Rose 500
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(pxp, 0);
+                ctx.lineTo(pxp, height);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Draw Parabola Curve
+            ctx.beginPath();
+            ctx.strokeStyle = "#38bdf8"; // Cyan 400
+            ctx.lineWidth = 3.5;
+
+            let isFirst = true;
+            const step = 0.05;
+            for (let x = xMin; x <= xMax; x += step) {
+                const y = a * x * x + b * x + c;
+                const px = toPxX(x);
+                const py = toPxY(y);
+
+                if (isFirst) {
+                    ctx.moveTo(px, py);
+                    isFirst = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // Highlight Vertex Point
+            if (options.showVertex !== false) {
+                const pxp = toPxX(xp);
+                const pyp = toPxY(yp);
+
+                if (pxp >= 0 && pxp <= width && pyp >= 0 && pyp <= height) {
+                    ctx.fillStyle = "#fbbf24"; // Amber 400
+                    ctx.beginPath();
+                    ctx.arc(pxp, pyp, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.stroke();
+
+                    // Text label
+                    ctx.fillStyle = "#fbbf24";
+                    ctx.font = "bold 11px Fira Code, monospace";
+                    ctx.textAlign = xp > 0 ? "right" : "left";
+                    ctx.fillText(`P(${xp.toFixed(1)}, ${yp.toFixed(1)})`, pxp + (xp > 0 ? -10 : 10), pyp - 10);
+                }
+            }
+
+            // Highlight Y-intercept Point (0, c)
+            if (options.showYInt !== false) {
+                const pyInt = toPxY(c);
+                if (pyInt >= 0 && pyInt <= height) {
+                    ctx.fillStyle = "#10b981"; // Emerald 500
+                    ctx.beginPath();
+                    ctx.arc(originX, pyInt, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.stroke();
+                }
+            }
+
+            // Highlight X-intercept Points (Roots)
+            if (options.showXInt !== false && D >= 0) {
+                const x1 = (-b + Math.sqrt(D)) / (2 * a);
+                const x2 = (-b - Math.sqrt(D)) / (2 * a);
+
+                [x1, x2].forEach(xRoot => {
+                    const pxRoot = toPxX(xRoot);
+                    if (pxRoot >= 0 && pxRoot <= width) {
+                        ctx.fillStyle = "#c084fc"; // Purple 400
+                        ctx.beginPath();
+                        ctx.arc(pxRoot, originY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = "#ffffff";
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+
+        /* ================= GAME STATE & LOGIC ================= */
+        const gameState = {
+            mode: 'menu',
+            level: 1,
+            questionIndex: 0,
+            score: 0,
+            lives: 3,
+            combo: 1,
+            timer: 25,
+            timerInterval: null,
+            levelScore: 0,
+            correctCount: 0,
+            currentQuestion: null,
+            sandbox: { a: 1, b: 0, c: -4 }
+        };
+
+        // Switch Screen View Mode
+        function switchMode(newMode) {
+            sound.play('click');
+            gameState.mode = newMode;
+
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('arcadeScreen').classList.add('hidden');
+            document.getElementById('sandboxScreen').classList.add('hidden');
+
+            document.getElementById('navBtnArcade').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold rounded-lg transition flex items-center gap-2 " +
+                (newMode === 'arcade' ? "bg-indigo-600 text-white shadow-md" : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700");
+            
+            document.getElementById('navBtnSandbox').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold rounded-lg transition flex items-center gap-2 " +
+                (newMode === 'sandbox' ? "bg-indigo-600 text-white shadow-md" : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700");
+
+            if (newMode === 'menu') {
+                document.getElementById('menuScreen').classList.remove('hidden');
+            } else if (newMode === 'arcade') {
+                document.getElementById('arcadeScreen').classList.remove('hidden');
+                document.getElementById('arcadeScreen').classList.add('flex');
+                if (gameState.lives <= 0 || gameState.questionIndex === 0) {
+                    initArcadeLevel(gameState.level);
+                } else {
+                    renderQuestion();
+                }
+            } else if (newMode === 'sandbox') {
+                document.getElementById('sandboxScreen').classList.remove('hidden');
+                document.getElementById('sandboxScreen').classList.add('flex');
+                updateSandbox();
+            }
+        }
+
+
+        /* ================= PROCEDURAL QUESTION GENERATOR ================= */
+        function generateQuestionData(level) {
+            // Helper to generate clean parameters resulting in nice integers
+            const pickA = () => {
+                const choices = [-2, -1, 1, 2];
+                return choices[Math.floor(Math.random() * choices.length)];
+            };
+            const pickXp = () => Math.floor(Math.random() * 7) - 3; // -3 to 3
+            const pickYp = () => Math.floor(Math.random() * 7) - 3; // -3 to 3
+
+            if (level === 1) {
+                // LEVEL 1: Keterbukaan & Bentuk Kurva
+                const a = pickA();
+                const xp = pickXp();
+                const yp = pickYp();
+                const b = -2 * a * xp;
+                const c = a * xp * xp + yp;
+                const eqStr = formatEquation(a, b, c);
+
+                const isUp = a > 0;
+                const type = Math.floor(Math.random() * 2);
+
+                if (type === 0) {
+                    return {
+                        level: 1,
+                        category: "Keterbukaan Kurva",
+                        a, b, c,
+                        text: `Bagaimana arah keterbukaan dari kurva fungsi kuadrat <span class="font-mono text-cyan-300 font-bold">$y = ${eqStr}$</span>?`,
+                        options: [
+                            { text: `Terbuka ke ${isUp ? 'ATAS' : 'BAWAH'}, karena nilai $a = ${a} ${isUp ? '> 0' : '< 0'}$`, correct: true },
+                            { text: `Terbuka ke ${isUp ? 'BAWAH' : 'ATAS'}, karena nilai $a = ${a} ${isUp ? '> 0' : '< 0'}$`, correct: false },
+                            { text: `Terbuka ke KANAN, karena koefisien $b = ${b}$`, correct: false },
+                            { text: `Terbuka ke KIRI, karena nilai diskriminan $D > 0$`, correct: false }
+                        ],
+                        explanation: `Koefisien utama fungsi kuadrat $y = ax^2 + bx + c$ adalah $a = ${a}$. Sifat keterbukaan kurva parabola ditentukan oleh tanda nilai $a$:\n• Jika $a > 0$, parabola terbuka ke **ATAS** (memiliki titik minimum).\n• Jika $a < 0$, parabola terbuka ke **BAWAH** (memiliki titik maksimum).\nKarena $a = ${a}$ (${a > 0 ? 'positif' : 'negatif'}), kurva terbuka ke **${isUp ? 'ATAS' : 'BAWAH'}**.`
+                    };
+                } else {
+                    const absA = Math.abs(a);
+                    return {
+                        level: 1,
+                        category: "Kecuraman Kurva Parabola",
+                        a, b, c,
+                        text: `Perhatikan fungsi $y = ${eqStr}$. Apakah bentuk kurva parabola ini lebih menyempit/ramping dibandingkan $y = x^2$?`,
+                        options: [
+                            { text: absA > 1 ? `Ya, lebih menyempit karena $|a| = ${absA} > 1$` : `Tidak, lebih melebar karena $|a| = ${absA} \\le 1$`, correct: true },
+                            { text: absA > 1 ? `Tidak, lebih melebar karena $|a| = ${absA} > 1$` : `Ya, lebih menyempit karena $|a| = ${absA} \\le 1$`, correct: false },
+                            { text: `Sama persis karena nilai $b = ${b}$`, correct: false },
+                            { text: `Terbalik secara horizontal karena $c = ${c}$`, correct: false }
+                        ],
+                        explanation: `Kecuraman kurva ditentukan oleh nilai mutlak $|a|$:\n• Jika $|a| > 1$, kurva menjadi lebih **ramping/menyempit** mendekati sumbu simetri.\n• Jika $0 < |a| < 1$, kurva menjadi lebih **melebar/landai**.\nPada fungsi ini, $|a| = |${a}| = ${absA}$. Maka kurva parabola ini **${absA > 1 ? 'lebih menyempit' : 'lebih melebar/landai'}**.`
+                    };
+                }
+            } else if (level === 2) {
+                // LEVEL 2: Diskriminan D & Titik Potong Sumbu
+                const a = pickA();
+                const xp = pickXp();
+                const yp = pickYp();
+                const b = -2 * a * xp;
+                const c = a * xp * xp + yp;
+                const D = b * b - 4 * a * c;
+                const eqStr = formatEquation(a, b, c);
+
+                const type = Math.floor(Math.random() * 2);
+                if (type === 0) {
+                    let dDesc = D > 0 ? "memotong sumbu X di 2 titik berbeda" : (D === 0 ? "menyinggung sumbu X di 1 titik" : "tidak memotong sumbu X");
+                    return {
+                        level: 2,
+                        category: "Diskriminan & Sumbu X",
+                        a, b, c,
+                        text: `Berapa nilai Diskriminan ($D$) dari $y = ${eqStr}$ dan bagaimana kedudukannya terhadap sumbu X?`,
+                        options: [
+                            { text: `$D = ${D}$, grafik ${dDesc}`, correct: true },
+                            { text: `$D = ${D + 8}$, grafik memotong sumbu X di 2 titik`, correct: false },
+                            { text: `$D = ${-D}$, grafik selalu menyinggung sumbu Y`, correct: false },
+                            { text: `$D = ${D - 4}$, grafik sejajar dengan sumbu X`, correct: false }
+                        ],
+                        explanation: `Rumus Diskriminan: $D = b^2 - 4ac$\nDengan $a = ${a}, b = ${b}, c = ${c}$:\n$D = (${b})^2 - 4(${a})(${c}) = ${b*b} - (${4*a*c}) = ${D}$.\n\nAnalisis Nilai D:\n• $D > 0$: Memotong sumbu X di 2 titik berbeda.\n• $D = 0$: Menyinggung sumbu X di 1 titik ($x_p$).\n• $D < 0$: Tidak memotong sumbu X sama sekali.`
+                    };
+                } else {
+                    return {
+                        level: 2,
+                        category: "Titik Potong Sumbu Y",
+                        a, b, c,
+                        text: `Tentukan koordinat titik potong grafik $y = ${eqStr}$ dengan sumbu Y!`,
+                        options: [
+                            { text: `(0, ${c})`, correct: true },
+                            { text: `(${c}, 0)`, correct: false },
+                            { text: `(0, ${-c})`, correct: false },
+                            { text: `(${b}, ${c})`, correct: false }
+                        ],
+                        explanation: `Titik potong grafik dengan sumbu Y terjadi ketika nilai $x = 0$.\nSubstitusi $x = 0$ ke rumus fungsi:\n$y = ${a}(0)^2 + ${b}(0) + ${c} = ${c}$.\nJadi, titik potong sumbu Y terletak pada koordinat **(0, ${c})**.`
+                    };
+                }
+            } else if (level === 3) {
+                // LEVEL 3: Sumbu Simetri & Titik Puncak
+                const a = pickA();
+                const xp = pickXp();
+                const yp = pickYp();
+                const b = -2 * a * xp;
+                const c = a * xp * xp + yp;
+                const eqStr = formatEquation(a, b, c);
+
+                const type = Math.floor(Math.random() * 2);
+                if (type === 0) {
+                    return {
+                        level: 3,
+                        category: "Persamaan Sumbu Simetri",
+                        a, b, c,
+                        text: `Tentukan persamaan sumbu simetri dari grafik fungsi kuadrat $y = ${eqStr}$!`,
+                        options: [
+                            { text: `$x = ${xp}$`, correct: true },
+                            { text: `$x = ${-xp}$`, correct: false },
+                            { text: `$y = ${yp}$`, correct: false },
+                            { text: `$x = ${xp + 2}$`, correct: false }
+                        ],
+                        explanation: `Rumus persamaan sumbu simetri adalah:\n$x = -\\frac{b}{2a}$\nDiketahui $a = ${a}, b = ${b}$:\n$x = -\\frac{${b}}{2(${a})} = -\\frac{${b}}{${2*a}} = ${xp}$.\nPersamaan sumbu simetri adalah garis **x = ${xp}**.`
+                    };
+                } else {
+                    const vertexType = a > 0 ? "Minimum" : "Maksimum";
+                    return {
+                        level: 3,
+                        category: "Titik Puncak (Ekstrem)",
+                        a, b, c,
+                        text: `Tentukan koordinat titik puncak dan jenisnya dari fungsi $y = ${eqStr}$!`,
+                        options: [
+                            { text: `Puncak ${vertexType} di (${xp}, ${yp})`, correct: true },
+                            { text: `Puncak ${a > 0 ? 'Maksimum' : 'Minimum'} di (${xp}, ${yp})`, correct: false },
+                            { text: `Puncak ${vertexType} di (${yp}, ${xp})`, correct: false },
+                            { text: `Puncak ${vertexType} di (${-xp}, ${yp})`, correct: false }
+                        ],
+                        explanation: `1. Absis titik puncak ($x_p$) = $-\\frac{b}{2a} = -\\frac{${b}}{2(${a})} = ${xp}$.\n2. Ordinat titik puncak ($y_p$) = $f(x_p) = ${a}(${xp})^2 + ${b}(${xp}) + ${c} = ${yp}$.\n3. Karena $a = ${a} ${a > 0 ? '> 0' : '< 0}$, jenis puncaknya adalah **${vertexType}**.\nKoordinat titik puncak adalah **(${xp}, ${yp})**.`
+                    };
+                }
+            } else {
+                // LEVEL 4: Tebak Grafik / Matching Persamaan
+                const a = pickA();
+                const xp = pickXp();
+                const yp = pickYp();
+                const b = -2 * a * xp;
+                const c = a * xp * xp + yp;
+                const correctEq = formatEquation(a, b, c);
+
+                const wrongEq1 = formatEquation(-a, b, c);
+                const wrongEq2 = formatEquation(a, -b, c);
+                const wrongEq3 = formatEquation(a, b, c + (c > 0 ? -3 : 3));
+
+                return {
+                    level: 4,
+                    category: "Tebak Persamaan dari Grafik",
+                    a, b, c,
+                    text: `Amati grafik parabola di samping! Manakah persamaan fungsi kuadrat yang paling tepat merepresentasikan grafik tersebut?`,
+                    options: [
+                        { text: `$y = ${correctEq}$`, correct: true },
+                        { text: `$y = ${wrongEq1}$`, correct: false },
+                        { text: `$y = ${wrongEq2}$`, correct: false },
+                        { text: `$y = ${wrongEq3}$`, correct: false }
+                    ].sort(() => Math.random() - 0.5),
+                    explanation: `Analisis Ciri-ciri Grafik:\n1. Keterbukaan: Kurva terbuka ke **${a > 0 ? 'ATAS (a > 0)' : 'BAWAH (a < 0)'}**.\n2. Potong Sumbu Y: Memotong sumbu Y di titik **(0, ${c})**.\n3. Titik Puncak: Terletak di **(${xp}, ${yp})**.\nPilihan yang memenuhi semua ketiga karakteristik visual ini adalah **y = ${correctEq}**.`
+                };
+            }
+        }
+
+
+        /* ================= ARCADE FLOW CONTROLLER ================= */
+        function initArcadeLevel(levelNum) {
+            gameState.level = levelNum;
+            gameState.questionIndex = 0;
+            gameState.levelScore = 0;
+            gameState.correctCount = 0;
+            gameState.lives = 3;
+            gameState.combo = 1;
+
+            updateHud();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            // Generate Question Data
+            const qData = generateQuestionData(gameState.level);
+            gameState.currentQuestion = qData;
+
+            // Render HUD Header info
+            const levelTitles = [
+                "",
+                "Level 1: Keterbukaan Kurva",
+                "Level 2: Diskriminan & Sumbu",
+                "Level 3: Sumbu Simetri & Puncak",
+                "Level 4: Master Tebak Grafik"
+            ];
+            document.getElementById('hudLevelBadge').innerText = `Level ${gameState.level}`;
+            document.getElementById('hudLevelTitle').innerText = levelTitles[gameState.level];
+            document.getElementById('hudCurrentQ').innerText = gameState.questionIndex + 1;
+            document.getElementById('hudTotalQ').innerText = 4;
+
+            // Render Question Text & Category
+            document.getElementById('qCategoryTag').innerText = `Kategori: ${qData.category}`;
+            document.getElementById('questionText').innerHTML = qData.text;
+
+            // Render Options
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            document.getElementById('feedbackContainer').classList.add('hidden');
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 sm:p-4 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700/80 hover:border-indigo-500/60 transition duration-150 flex items-center gap-3 text-xs sm:text-sm text-slate-200 arcade-btn font-medium group";
+                btn.onclick = () => selectAnswer(idx);
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-indigo-400 font-mono font-bold flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">${prefixes[idx]}</span>
+                    <span class="flex-1">${opt.text}</span>
+                `;
+                container.appendChild(btn);
+            });
+
+            // Draw Canvas Graph
+            renderParabolaCanvas('quizCanvas', qData.a, qData.b, qData.c, {
+                showVertex: gameState.level >= 3,
+                showYInt: gameState.level >= 2,
+                showXInt: gameState.level >= 2
+            });
+
+            // Start Timer
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timer = 25;
+            updateTimerUI();
+
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                updateTimerUI();
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            document.getElementById('qTimerText').innerHTML = `<i class="fa-regular fa-clock"></i> ${gameState.timer}s`;
+            const pct = (gameState.timer / 25) * 100;
+            document.getElementById('quizTimerBar').style.width = `${pct}%`;
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(gameState.timerInterval);
+
+            const q = gameState.currentQuestion;
+            const selectedOpt = q.options[selectedIndex];
+            const isCorrect = selectedOpt.correct;
+
+            // Disable all option buttons
+            const optionBtns = document.querySelectorAll('#optionsContainer button');
+            optionBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (q.options[idx].correct) {
+                    btn.classList.remove('bg-slate-800/80', 'border-slate-700/80');
+                    btn.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('bg-slate-800/80', 'border-slate-700/80');
+                    btn.classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-200');
+                }
+            });
+
+            // Feedback Container Elements
+            const fbBox = document.getElementById('feedbackContainer');
+            const fbTitle = document.getElementById('feedbackTitle');
+            const fbExp = document.getElementById('feedbackExplanation');
+            const bonusTag = document.getElementById('scoreBonusTag');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-950/40', 'border-emerald-500/40', 'bg-rose-950/40', 'border-rose-500/40');
+
+            if (isCorrect) {
+                sound.play(gameState.combo >= 2 ? 'combo' : 'correct');
+                
+                const timeBonus = gameState.timer * 4;
+                const baseScore = 100;
+                const earned = (baseScore + timeBonus) * gameState.combo;
+                gameState.score += earned;
+                gameState.levelScore += earned;
+                gameState.correctCount++;
+                gameState.combo++;
+
+                fbBox.classList.add('bg-emerald-950/40', 'border-emerald-500/40');
+                fbTitle.innerHTML = `<span class="text-emerald-400 font-extrabold"><i class="fa-solid fa-circle-check"></i> Jawaban Benar!</span>`;
+                bonusTag.innerText = `+${earned} Pts (Combo ${gameState.combo-1}x)`;
+                bonusTag.className = "text-xs font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-bold border border-emerald-700";
+            } else {
+                sound.play('wrong');
+                gameState.lives--;
+                gameState.combo = 1;
+
+                fbBox.classList.add('bg-rose-950/40', 'border-rose-500/40');
+                fbTitle.innerHTML = `<span class="text-rose-400 font-extrabold"><i class="fa-solid fa-circle-xmark"></i> Jawaban Kurang Tepat</span>`;
+                bonusTag.innerText = `0 Pts`;
+                bonusTag.className = "text-xs font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 font-bold border border-rose-700";
+            }
+
+            fbExp.innerText = q.explanation;
+            updateHud();
+
+            if (gameState.lives <= 0) {
+                setTimeout(showGameOver, 1200);
+            }
+        }
+
+        function handleTimeout() {
+            sound.play('wrong');
+            gameState.lives--;
+            gameState.combo = 1;
+            updateHud();
+
+            const fbBox = document.getElementById('feedbackContainer');
+            const fbTitle = document.getElementById('feedbackTitle');
+            const fbExp = document.getElementById('feedbackExplanation');
+            const bonusTag = document.getElementById('scoreBonusTag');
+
+            fbBox.classList.remove('hidden');
+            fbBox.classList.add('bg-rose-950/40', 'border-rose-500/40');
+            fbTitle.innerHTML = `<span class="text-amber-400 font-extrabold"><i class="fa-solid fa-clock"></i> Waktu Habis!</span>`;
+            bonusTag.innerText = `0 Pts`;
+            bonusTag.className = "text-xs font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 font-bold border border-rose-700";
+
+            fbExp.innerText = gameState.currentQuestion.explanation;
+
+            if (gameState.lives <= 0) {
+                setTimeout(showGameOver, 1200);
+            }
+        }
+
+        function nextQuestion() {
+            sound.play('click');
+            gameState.questionIndex++;
+
+            if (gameState.questionIndex >= 4) {
+                // Level Completed!
+                showLevelComplete();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function updateHud() {
+            document.getElementById('hudScore').innerText = gameState.score.toString().padStart(4, '0');
+            document.getElementById('hudCombo').innerText = `Combo x${gameState.combo}`;
+
+            // Render hearts
+            const heartsContainer = document.getElementById('hudLives');
+            let heartsHtml = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < gameState.lives) {
+                    heartsHtml += '<i class="fa-solid fa-heart text-rose-500"></i>';
+                } else {
+                    heartsHtml += '<i class="fa-regular fa-heart text-slate-600"></i>';
+                }
+            }
+            heartsContainer.innerHTML = heartsHtml;
+        }
+
+        function showLevelComplete() {
+            sound.play('levelcomplete');
+            const modal = document.getElementById('levelCompleteModal');
+            document.getElementById('lcLevelScore').innerText = gameState.levelScore;
+            
+            const accuracy = Math.round((gameState.correctCount / 4) * 100);
+            document.getElementById('lcAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('lcTotalScore').innerText = gameState.score;
+
+            // Render Stars
+            const starsContainer = document.getElementById('lcStars');
+            let starsHtml = '';
+            const stars = accuracy >= 100 ? 3 : (accuracy >= 50 ? 2 : 1);
+            for (let i = 0; i < 3; i++) {
+                if (i < stars) starsHtml += '<i class="fa-solid fa-star text-amber-400"></i>';
+                else starsHtml += '<i class="fa-regular fa-star text-slate-600"></i>';
+            }
+            starsContainer.innerHTML = starsHtml;
+
+            const nextBtn = document.getElementById('lcNextBtn');
+            if (gameState.level >= 4) {
+                nextBtn.innerHTML = `Selesai Game <i class="fa-solid fa-check"></i>`;
+                nextBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    switchMode('menu');
+                };
+            } else {
+                nextBtn.innerHTML = `Lanjut Level ${gameState.level + 1} <i class="fa-solid fa-arrow-right"></i>`;
+                nextBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    nextLevel();
+                };
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function nextLevel() {
+            if (gameState.level < 4) {
+                gameState.level++;
+                initArcadeLevel(gameState.level);
+            }
+        }
+
+        function retryLevel() {
+            document.getElementById('levelCompleteModal').classList.add('hidden');
+            initArcadeLevel(gameState.level);
+        }
+
+        function showGameOver() {
+            sound.play('gameover');
+            document.getElementById('goFinalScore').innerText = gameState.score;
+            document.getElementById('goLevelReached').innerText = `Level ${gameState.level}`;
+            document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        function restartArcade() {
+            document.getElementById('gameOverModal').classList.add('hidden');
+            gameState.score = 0;
+            initArcadeLevel(1);
+        }
+
+
+        /* ================= SANDBOX EXPLORATION CONTROLLER ================= */
+        function updateSandbox() {
+            const a = parseFloat(document.getElementById('sliderA').value);
+            const b = parseFloat(document.getElementById('sliderB').value);
+            const c = parseFloat(document.getElementById('sliderC').value);
+
+            gameState.sandbox = { a, b, c };
+
+            // Update Value Displays
+            document.getElementById('valA').innerText = a.toFixed(1);
+            document.getElementById('valB').innerText = b.toFixed(1);
+            document.getElementById('valC').innerText = c.toFixed(1);
+
+            document.getElementById('sbEquationDisplay').innerText = `y = ${formatEquation(a, b, c)}`;
+
+            // Calculate Features
+            const D = b * b - 4 * a * c;
+            const xp = -b / (2 * a);
+            const yp = -D / (4 * a);
+
+            // Update Analytical Card UI
+            document.getElementById('sbValD').innerText = `D = ${D.toFixed(1)}`;
+            if (D > 0) {
+                document.getElementById('sbInfoD').innerText = "Memotong X di 2 titik";
+                document.getElementById('sbValD').className = "font-mono text-base font-extrabold text-emerald-400";
+            } else if (D === 0) {
+                document.getElementById('sbInfoD').innerText = "Menyinggung X di 1 titik";
+                document.getElementById('sbValD').className = "font-mono text-base font-extrabold text-amber-400";
+            } else {
+                document.getElementById('sbInfoD').innerText = "Tidak memotong sumbu X";
+                document.getElementById('sbValD').className = "font-mono text-base font-extrabold text-rose-400";
+            }
+
+            document.getElementById('sbValVertex').innerText = `(${xp.toFixed(2)}, ${yp.toFixed(2)})`;
+            document.getElementById('sbInfoVertex').innerText = a > 0 ? "Titik Minimum (a > 0)" : "Titik Maksimum (a < 0)";
+            document.getElementById('sbValAxis').innerText = `x = ${xp.toFixed(2)}`;
+
+            if (D >= 0) {
+                const x1 = (-b + Math.sqrt(D)) / (2 * a);
+                const x2 = (-b - Math.sqrt(D)) / (2 * a);
+                document.getElementById('sbValRoots').innerText = `(${x1.toFixed(1)}, 0), (${x2.toFixed(1)}, 0)`;
+                document.getElementById('sbInfoRoots').innerText = "Akar Real";
+            } else {
+                document.getElementById('sbValRoots').innerText = "Tidak Ada";
+                document.getElementById('sbInfoRoots').innerText = "Akar Imajiner";
+            }
+
+            // Options checkboxes
+            const showVertex = document.getElementById('chkVertex').checked;
+            const showYInt = document.getElementById('chkYInt').checked;
+            const showXInt = document.getElementById('chkXInt').checked;
+
+            // Render Graph
+            renderParabolaCanvas('sandboxCanvas', a, b, c, {
+                showVertex,
+                showYInt,
+                showXInt
+            });
+        }
+
+        function setSandboxPreset(a, b, c) {
+            sound.play('click');
+            document.getElementById('sliderA').value = a;
+            document.getElementById('sliderB').value = b;
+            document.getElementById('sliderC').value = c;
+            updateSandbox();
+        }
+
+        // Window resize handler to keep Canvas crisp
+        window.addEventListener('resize', () => {
+            if (gameState.mode === 'arcade' && gameState.currentQuestion) {
+                renderParabolaCanvas('quizCanvas', gameState.currentQuestion.a, gameState.currentQuestion.b, gameState.currentQuestion.c);
+            } else if (gameState.mode === 'sandbox') {
+                updateSandbox();
+            }
+        });
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            updateSandbox();
+        };
+    </script>
+</body>
+</html>
