@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarik Tambang - Grafik Fungsi Kuadrat</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+        }
+        /* Custom animated backdrop gradients */
+        .bg-red-gradient {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        }
+        .bg-blue-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        /* Pulse animations for active turn */
+        @keyframes activePulseRed {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+        }
+        @keyframes activePulseBlue {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            50% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+        }
+        .turn-active-red {
+            animation: activePulseRed 2s infinite;
+        }
+        .turn-active-blue {
+            animation: activePulseBlue 2s infinite;
+        }
+        /* Canvas Container */
+        #gameCanvas {
+            width: 100%;
+            height: 240px;
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-2 sm:p-4">
+
+    <!-- HEADER / TOP NAV -->
+    <header class="max-w-5xl mx-auto w-full flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 sm:p-4 rounded-2xl border border-slate-700 shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg">
+                <i class="fa-solid font-bold fa-chart-line text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-red-400 via-amber-300 to-blue-400 bg-clip-text text-transparent">
+                    Tarik Tambang: Fungsi Kuadrat
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Adu Cepat & Tepat Pemahaman Matematika</p>
+            </div>
+        </div>
+
+        <!-- Round & Position Info -->
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl text-center">
+                <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Babak</span>
+                <span id="roundDisplay" class="text-base sm:text-lg font-black text-amber-400">1 / 8</span>
+            </div>
+            <button id="btnReset" onclick="resetGame()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-xl transition flex items-center space-x-1 border border-slate-600">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span class="hidden sm:inline">Reset</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME AREA -->
+    <main class="max-w-5xl mx-auto w-full my-3 flex-grow flex flex-col gap-4">
+        
+        <!-- SCOREBOARD & TUG OF WAR ARENA -->
+        <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col gap-3">
+            
+            <!-- Teams Header Info -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Red Team Status -->
+                <div id="cardTeamRed" class="p-3 rounded-xl bg-red-950/40 border-2 border-red-600/60 flex items-center justify-between transition-all duration-300">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center font-black text-white text-lg shadow-md">
+                            K
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-sm sm:text-base text-red-400">Tim Merah</h2>
+                            <p class="text-xs text-slate-300 hidden sm:block">Sisi Kiri</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block uppercase font-bold">Poin Ditarik</span>
+                        <span id="scoreRed" class="text-xl sm:text-2xl font-black text-red-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Blue Team Status -->
+                <div id="cardTeamBlue" class="p-3 rounded-xl bg-blue-950/40 border-2 border-blue-600/60 flex items-center justify-between transition-all duration-300">
+                    <div class="text-left">
+                        <span class="text-[10px] text-slate-400 block uppercase font-bold">Poin Ditarik</span>
+                        <span id="scoreBlue" class="text-xl sm:text-2xl font-black text-blue-400">0</span>
+                    </div>
+                    <div class="flex items-center space-x-3 flex-row-reverse space-x-reverse">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-white text-lg shadow-md">
+                            N
+                        </div>
+                        <div class="text-right">
+                            <h2 class="font-extrabold text-sm sm:text-base text-blue-400">Tim Biru</h2>
+                            <p class="text-xs text-slate-300 hidden sm:block">Sisi Kanan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TUG OF WAR CANVAS DISPLAY -->
+            <div class="relative w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-700/80 shadow-inner">
+                <canvas id="gameCanvas"></canvas>
+                
+                <!-- Position Gauge Bar Overlay at bottom of canvas -->
+                <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-3/4 max-w-md bg-slate-900/90 border border-slate-700 rounded-full p-1.5 backdrop-blur shadow-lg flex items-center">
+                    <span class="text-[10px] font-extrabold text-red-400 px-2">KIRI (+5)</span>
+                    <div class="flex-grow h-3 bg-slate-800 rounded-full relative overflow-hidden mx-1 border border-slate-700">
+                        <!-- Center Line -->
+                        <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-amber-400 z-10"></div>
+                        <!-- Meter Indicator Bar -->
+                        <div id="meterBar" class="h-full bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 transition-all duration-500" style="width: 50%;"></div>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-blue-400 px-2">KANAN (+5)</span>
+                </div>
+            </div>
+
+            <!-- Turn Status Banner -->
+            <div id="turnBanner" class="text-center py-2 px-4 rounded-xl text-sm font-extrabold bg-red-600/20 text-red-300 border border-red-500/30">
+                Giliran Beraksi: Tim Merah (Kiri)
+            </div>
+        </div>
+
+        <!-- QUESTION & INTERACTION CONTAINER -->
+        <div id="questionContainer" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 sm:p-6 shadow-2xl flex-grow flex flex-col justify-between">
+            
+            <!-- Question Header & Topic Badge -->
+            <div>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span id="topicBadge" class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-lg uppercase tracking-wide">
+                        Topik 1: Keterbukaan Parabola (Nilai a)
+                    </span>
+                    <span id="teamTurnBadge" class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow">
+                        Soal Untuk: TIM MERAH
+                    </span>
+                </div>
+
+                <!-- Question Text -->
+                <div id="questionText" class="text-base sm:text-lg font-bold text-slate-100 leading-relaxed mb-6 p-4 bg-slate-900/60 rounded-xl border border-slate-700/60 min-h-[80px] flex items-center">
+                    Memuat pertanyaan...
+                </div>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <!-- Options populated dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <!-- EXPLANATION MODAL -->
+    <div id="explanationModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl transform transition-all scale-100 flex flex-col gap-4">
+            
+            <div class="flex items-center space-x-3">
+                <div id="resultIcon" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                    <h3 id="resultTitle" class="text-lg font-black">Jawaban Benar!</h3>
+                    <p id="resultSubtitle" class="text-xs text-slate-400">Tim Merah berhasil menarik tali ke kiri (+1 Poin).</p>
+                </div>
+            </div>
+
+            <!-- Solution Details -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 text-sm text-slate-200 space-y-2">
+                <span class="text-xs font-extrabold uppercase text-amber-400 block tracking-wider"><i class="fa-solid fa-book-open mr-1"></i> Pembahasan Soal:</span>
+                <p id="explanationText" class="leading-relaxed font-medium">
+                    Penjelasan langkah demi langkah akan muncul di sini.
+                </p>
+            </div>
+
+            <!-- Next Button -->
+            <button id="btnNextQuestion" onclick="closeExplanation()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                <span>Lanjut ke Soal Berikutnya</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- VICTORY / GAME OVER MODAL -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border-2 border-amber-500/50 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center flex flex-col items-center gap-4 relative overflow-hidden">
+            
+            <!-- Confetti Canvas -->
+            <canvas id="confettiCanvas" class="absolute inset-0 pointer-events-none"></canvas>
+
+            <div class="w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center text-4xl border border-amber-400/40 shadow-xl mb-2">
+                <i class="fa-solid fa-trophy animate-bounce"></i>
+            </div>
+
+            <h2 id="victoryTitle" class="text-2xl sm:text-3xl font-black text-amber-400">
+                TIM MERAH MENANG!
+            </h2>
+            <p id="victorySubtitle" class="text-sm text-slate-300 font-medium">
+                Selamat! Tim Merah berhasil menguasai area tarik tambang.
+            </p>
+
+            <!-- Final Stats Summary -->
+            <div class="w-full bg-slate-900/80 p-4 rounded-2xl border border-slate-700 grid grid-cols-2 gap-4 my-2 text-center">
+                <div class="border-r border-slate-700 pr-2">
+                    <span class="text-[11px] text-red-400 font-bold block uppercase">Tim Merah</span>
+                    <span id="finalScoreRed" class="text-2xl font-black text-white">0</span>
+                </div>
+                <div class="pl-2">
+                    <span class="text-[11px] text-blue-400 font-bold block uppercase">Tim Biru</span>
+                    <span id="finalScoreBlue" class="text-2xl font-black text-white">0</span>
+                </div>
+            </div>
+
+            <button onclick="resetGame()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl shadow-xl transition flex items-center justify-center space-x-2 text-base">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Main Lagi / Reset</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 py-2">
+        Game Edukasi Matematika &copy; Grafik Fungsi Kuadrat - Modul Pembelajaran Interactive
+    </footer>
+
+    <!-- SCRIPT ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. QUESTION BANK (8 ROUNDS x 2 TEAMS = 16 QUESTIONS MATCHED BY TOPIC)
+           ========================================================================== */
+        const questionBank = [
+            // BABAK 1: Keterbukaan Parabola (Nilai a)
+            {
+                round: 1,
+                topic: "Babak 1: Keterbukaan Parabola (Nilai a)",
+                left: {
+                    team: "MERAH",
+                    question: "Grafik fungsi kuadrat f(x) = -2x² + 4x + 5 memiliki arah keterbukaan parabola ke...",
+                    options: [
+                        { text: "A. Ke Atas", correct: false },
+                        { text: "B. Ke Bawah", correct: true },
+                        { text: "C. Ke Kanan", correct: false },
+                        { text: "D. Ke Kiri", correct: false }
+                    ],
+                    explanation: "Karena nilai koefisien x² adalah a = -2 (a < 0), maka grafik parabola terbuka ke bawah dan memiliki nilai maksimum."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Grafik fungsi kuadrat f(x) = 3x² - 6x + 1 memiliki arah keterbukaan parabola ke...",
+                    options: [
+                        { text: "A. Ke Bawah", correct: false },
+                        { text: "B. Ke Atas", correct: true },
+                        { text: "C. Ke Kiri", correct: false },
+                        { text: "D. Ke Kanan", correct: false }
+                    ],
+                    explanation: "Karena nilai koefisien x² adalah a = 3 (a > 0), maka grafik parabola terbuka ke atas dan memiliki nilai minimum."
+                }
+            },
+            // BABAK 2: Titik Potong Sumbu Y (Nilai c)
+            {
+                round: 2,
+                topic: "Babak 2: Titik Potong dengan Sumbu Y (Nilai c)",
+                left: {
+                    team: "MERAH",
+                    question: "Di manakah koordinat titik potong grafik f(x) = x² - 5x + 6 terhadap sumbu Y?",
+                    options: [
+                        { text: "A. (0, 6)", correct: true },
+                        { text: "B. (6, 0)", correct: false },
+                        { text: "C. (0, -5)", correct: false },
+                        { text: "D. (0, -6)", correct: false }
+                    ],
+                    explanation: "Titik potong dengan sumbu Y terjadi ketika x = 0. Maka f(0) = 0² - 5(0) + 6 = 6. Koordinatnya adalah (0, 6)."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Di manakah koordinat titik potong grafik f(x) = 2x² + 3x - 8 terhadap sumbu Y?",
+                    options: [
+                        { text: "A. (0, 3)", correct: false },
+                        { text: "B. (0, -8)", correct: true },
+                        { text: "C. (-8, 0)", correct: false },
+                        { text: "D. (0, 8)", correct: false }
+                    ],
+                    explanation: "Titik potong dengan sumbu Y terjadi saat x = 0. Maka f(0) = 2(0)² + 3(0) - 8 = -8. Koordinatnya adalah (0, -8)."
+                }
+            },
+            // BABAK 3: Persamaan Sumbu Simetri (x = -b / 2a)
+            {
+                round: 3,
+                topic: "Babak 3: Persamaan Sumbu Simetri",
+                left: {
+                    team: "MERAH",
+                    question: "Tentukan persamaan sumbu simetri dari grafik fungsi kuadrat f(x) = x² - 6x + 8 !",
+                    options: [
+                        { text: "A. x = 3", correct: true },
+                        { text: "B. x = -3", correct: false },
+                        { text: "C. x = 6", correct: false },
+                        { text: "D. x = -6", correct: false }
+                    ],
+                    explanation: "Rumus sumbu simetri adalah x = -b / (2a). Diketahui a = 1, b = -6. Maka x = -(-6) / (2 × 1) = 6 / 2 = 3."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Tentukan persamaan sumbu simetri dari grafik fungsi kuadrat f(x) = -2x² + 8x - 5 !",
+                    options: [
+                        { text: "A. x = -2", correct: false },
+                        { text: "B. x = 4", correct: false },
+                        { text: "C. x = 2", correct: true },
+                        { text: "D. x = -4", correct: false }
+                    ],
+                    explanation: "Rumus sumbu simetri adalah x = -b / (2a). Diketahui a = -2, b = 8. Maka x = -8 / (2 × -2) = -8 / -4 = 2."
+                }
+            },
+            // BABAK 4: Nilai Optimum / Ekstrem
+            {
+                round: 4,
+                topic: "Babak 4: Nilai Optimum / Nilai Ekstrem",
+                left: {
+                    team: "MERAH",
+                    question: "Berapakah nilai optimum (maksimum/minimum) dari fungsi kuadrat f(x) = x² - 4x + 7 ?",
+                    options: [
+                        { text: "A. Minimum y = 3", correct: true },
+                        { text: "B. Maksimum y = 3", correct: false },
+                        { text: "C. Minimum y = 7", correct: false },
+                        { text: "D. Maksimum y = -3", correct: false }
+                    ],
+                    explanation: "Karena a = 1 > 0, grafik memiliki nilai minimum. Sumbu simetri x = -(-4)/2 = 2. Substitusi x = 2: f(2) = 2² - 4(2) + 7 = 4 - 8 + 7 = 3. Nilai minimum = 3."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Berapakah nilai optimum (maksimum/minimum) dari fungsi kuadrat f(x) = -x² + 6x - 4 ?",
+                    options: [
+                        { text: "A. Minimum y = 5", correct: false },
+                        { text: "B. Maksimum y = 5", correct: true },
+                        { text: "C. Maksimum y = 6", correct: false },
+                        { text: "D. Minimum y = -4", correct: false }
+                    ],
+                    explanation: "Karena a = -1 < 0, grafik memiliki nilai maksimum. Sumbu simetri x = -6/(2 × -1) = 3. Substitusi x = 3: f(3) = -(3²) + 6(3) - 4 = -9 + 18 - 4 = 5. Nilai maksimum = 5."
+                }
+            },
+            // BABAK 5: Titik Puncak Parabola (xp, yp)
+            {
+                round: 5,
+                topic: "Babak 5: Titik Puncak Parabola (xp, yp)",
+                left: {
+                    team: "MERAH",
+                    question: "Koordinat titik puncak (titik balik) dari fungsi kuadrat f(x) = x² - 2x - 3 adalah...",
+                    options: [
+                        { text: "A. (1, -4)", correct: true },
+                        { text: "B. (-1, -4)", correct: false },
+                        { text: "C. (1, 4)", correct: false },
+                        { text: "D. (2, -3)", correct: false }
+                    ],
+                    explanation: "xp = -(-2)/(2 × 1) = 1. Masukkan xp = 1 ke f(x): yp = 1² - 2(1) - 3 = -4. Jadi titik puncaknya adalah (1, -4)."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Koordinat titik puncak (titik balik) dari fungsi kuadrat f(x) = 2x² - 8x + 6 adalah...",
+                    options: [
+                        { text: "A. (2, -2)", correct: true },
+                        { text: "B. (-2, 2)", correct: false },
+                        { text: "C. (2, 2)", correct: false },
+                        { text: "D. (4, -2)", correct: false }
+                    ],
+                    explanation: "xp = -(-8)/(2 × 2) = 8/4 = 2. Masukkan xp = 2 ke f(x): yp = 2(2²) - 8(2) + 6 = 8 - 16 + 6 = -2. Jadi titik puncaknya (2, -2)."
+                }
+            },
+            // BABAK 6: Diskriminan (D = b^2 - 4ac) & Sumbu X
+            {
+                round: 6,
+                topic: "Babak 6: Diskriminan & Potong Sumbu X",
+                left: {
+                    team: "MERAH",
+                    question: "Bagaimanakah kedudukan grafik f(x) = x² - 4x + 4 terhadap sumbu X?",
+                    options: [
+                        { text: "A. Menyinggung sumbu X di 1 titik", correct: true },
+                        { text: "B. Memotong sumbu X di 2 titik", correct: false },
+                        { text: "C. Tidak memotong sumbu X", correct: false },
+                        { text: "D. Berada di bawah sumbu X", correct: false }
+                    ],
+                    explanation: "Hitung D = b² - 4ac = (-4)² - 4(1)(4) = 16 - 16 = 0. Karena D = 0, grafik menyinggung sumbu X tepat di 1 titik."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Bagaimanakah kedudukan grafik f(x) = x² - 3x + 5 terhadap sumbu X?",
+                    options: [
+                        { text: "A. Memotong sumbu X di 2 titik", correct: false },
+                        { text: "B. Menyinggung sumbu X di 1 titik", correct: false },
+                        { text: "C. Tidak memotong sumbu X (Definit Positif)", correct: true },
+                        { text: "D. Berada di bawah sumbu X", correct: false }
+                    ],
+                    explanation: "Hitung D = b² - 4ac = (-3)² - 4(1)(5) = 9 - 20 = -11. Karena D < 0 dan a > 0, grafik tidak memotong sumbu X (selalu di atas sumbu X)."
+                }
+            },
+            // BABAK 7: Persamaan Fungsi Kuadrat dari Titik Puncak
+            {
+                round: 7,
+                topic: "Babak 7: Persamaan dari Titik Puncak",
+                left: {
+                    team: "MERAH",
+                    question: "Persamaan fungsi kuadrat yang memiliki titik puncak (2, 1) dan melalui titik (0, 5) adalah...",
+                    options: [
+                        { text: "A. f(x) = (x - 2)² + 1", correct: false },
+                        { text: "B. f(x) = x² - 4x + 5", correct: true },
+                        { text: "C. f(x) = 2x² - 4x + 5", correct: false },
+                        { text: "D. f(x) = -x² + 4x + 1", correct: false }
+                    ],
+                    explanation: "Bentuk puncak: y = a(x - xp)² + yp => y = a(x - 2)² + 1. Masukkan titik (0, 5) => 5 = a(0-2)² + 1 => 4a = 4 => a = 1. Persamaan: y = 1(x² - 4x + 4) + 1 = x² - 4x + 5."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Persamaan fungsi kuadrat yang memiliki titik puncak (1, 3) dan melalui titik (0, 1) adalah...",
+                    options: [
+                        { text: "A. f(x) = -2(x - 1)² + 3", correct: false },
+                        { text: "B. f(x) = 2x² - 4x + 3", correct: false },
+                        { text: "C. f(x) = -x² + 2x + 1", correct: false },
+                        { text: "D. f(x) = -2x² + 4x + 1", correct: true }
+                    ],
+                    explanation: "Bentuk puncak: y = a(x - 1)² + 3. Masukkan (0, 1) => 1 = a(0 - 1)² + 3 => a + 3 = 1 => a = -2. Maka y = -2(x² - 2x + 1) + 3 = -2x² + 4x + 1."
+                }
+            },
+            // BABAK 8: Pergeseran (Translasi) Grafik
+            {
+                round: 8,
+                topic: "Babak 8: Pergeseran (Translasi) Grafik",
+                left: {
+                    team: "MERAH",
+                    question: "Jika grafik f(x) = x² digeser 3 satuan ke kanan dan 2 satuan ke atas, persamaan barunya g(x) adalah...",
+                    options: [
+                        { text: "A. g(x) = (x - 3)² + 2", correct: true },
+                        { text: "B. g(x) = (x + 3)² + 2", correct: false },
+                        { text: "C. g(x) = (x - 3)² - 2", correct: false },
+                        { text: "D. g(x) = (x + 2)² + 3", correct: false }
+                    ],
+                    explanation: "Pergeseran horizontal ke kanan h unit menjadi (x - h) dan vertikal ke atas k unit menjadi + k. Jadi g(x) = (x - 3)² + 2."
+                },
+                right: {
+                    team: "BIRU",
+                    question: "Jika grafik f(x) = x² digeser 2 satuan ke kiri dan 4 satuan ke bawah, persamaan barunya g(x) adalah...",
+                    options: [
+                        { text: "A. g(x) = (x - 2)² - 4", correct: false },
+                        { text: "B. g(x) = (x + 2)² - 4", correct: true },
+                        { text: "C. g(x) = (x + 2)² + 4", correct: false },
+                        { text: "D. g(x) = (x - 4)² + 2", correct: false }
+                    ],
+                    explanation: "Pergeseran horizontal ke kiri 2 unit menjadi (x + 2) dan vertikal ke bawah 4 unit menjadi - 4. Jadi g(x) = (x + 2)² - 4."
+                }
+            }
+        ];
+
+        /* ==========================================================================
+           2. WEB AUDIO SYNTHESIZER (NO EXTERNAL AUDIO FILES REQUIRED)
+           ========================================================================== */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new AudioCtx();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                const now = audioContext.currentTime;
+
+                if (type === 'correct') {
+                    // Double high ding
+                    const osc1 = audioContext.createOscillator();
+                    const osc2 = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc1.type = 'sine';
+                    osc2.type = 'triangle';
+                    
+                    osc1.frequency.setValueAtTime(523.25, now); // C5
+                    osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc2.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc1.start(now);
+                    osc2.start(now + 0.2);
+                    osc1.stop(now + 0.45);
+                    osc2.stop(now + 0.45);
+                } 
+                else if (type === 'wrong') {
+                    // Buzz wobble
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.setValueAtTime(140, now + 0.15);
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } 
+                else if (type === 'pull') {
+                    // Rope tension sound
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.exponentialRampToValueAtTime(280, now + 0.2);
+                    
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } 
+                else if (type === 'victory') {
+                    // Fanfare Arpeggio
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const noteTime = now + (idx * 0.12);
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, noteTime);
+                        
+                        gain.gain.setValueAtTime(0.25, noteTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.3);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start(noteTime);
+                        osc.stop(noteTime + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked");
+            }
+        }
+
+        /* ==========================================================================
+           3. GAME STATE & ENGINE CONTROL
+           ========================================================================== */
+        let currentRound = 1;        // 1 to 8
+        let currentTurnSide = 'LEFT'; // 'LEFT' (Red) or 'RIGHT' (Blue)
+        let scoreRed = 0;             // Number of steps pulled left
+        let scoreBlue = 0;            // Number of steps pulled right
+        let ropePosition = 0;         // Range: -5 (Red Max Win) to +5 (Blue Max Win)
+        let targetRopeOffset = 0;     // Target offset for smooth animation
+        let currentRopeOffset = 0;    // Interpolated offset on canvas
+        let isAnswerLocked = false;   // Prevent multi clicks
+
+        /* ==========================================================================
+           4. TUG OF WAR CANVAS ANIMATION & DRAWING
+           ========================================================================== */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height || 240;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Draw dynamic Tug of War scene
+        function renderScene() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerY = height * 0.65;
+            const centerX = width / 2;
+
+            // Smooth rope movement interpolation
+            currentRopeOffset += (targetRopeOffset - currentRopeOffset) * 0.1;
+
+            // Clear Background
+            ctx.clearRect(0, 0, width, height);
+
+            // Sky / Arena Gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, '#0f172a');
+            bgGrad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Grass / Ground
+            const grassGrad = ctx.createLinearGradient(0, centerY, 0, height);
+            grassGrad.addColorStop(0, '#15803d');
+            grassGrad.addColorStop(1, '#166534');
+            ctx.fillStyle = grassGrad;
+            ctx.fillRect(0, centerY, width, height - centerY);
+
+            // Ground Top Border Line
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+
+            // Center Boundary Lines on Ground
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 40);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+
+            // Maximum Win Boundary Indicators (Left & Right)
+            const maxShiftPx = width * 0.3; // Limit visual range
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)'; // Red Win Line
+            ctx.beginPath();
+            ctx.moveTo(centerX - maxShiftPx, centerY - 30);
+            ctx.lineTo(centerX - maxShiftPx, height);
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)'; // Blue Win Line
+            ctx.beginPath();
+            ctx.moveTo(centerX + maxShiftPx, centerY - 30);
+            ctx.lineTo(centerX + maxShiftPx, height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Rope
+            const ropeShiftX = (currentRopeOffset / 5) * maxShiftPx;
+            const ropeY = centerY - 25;
+
+            ctx.strokeStyle = '#d97706';
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(30, ropeY);
+            ctx.lineTo(width - 30, ropeY);
+            ctx.stroke();
+
+            // Rope Texture Lines
+            ctx.strokeStyle = '#b45309';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 8]);
+            ctx.beginPath();
+            ctx.moveTo(30, ropeY);
+            ctx.lineTo(width - 30, ropeY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Center Flag / Ribbon on Rope
+            const flagX = centerX + ropeShiftX;
+            
+            // Ribbon Bow
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(flagX - 6, ropeY, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(flagX + 6, ropeY, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hanging Center Marker Flag
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(flagX, ropeY);
+            ctx.lineTo(flagX - 10, ropeY + 28);
+            ctx.lineTo(flagX + 10, ropeY + 28);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('▼', flagX, ropeY - 10);
+
+            // DRAW TEAMS (3 Players per team)
+            drawTeam(ctx, 'RED', centerX - 80 + ropeShiftX, ropeY, currentTurnSide === 'LEFT');
+            drawTeam(ctx, 'BLUE', centerX + 80 + ropeShiftX, ropeY, currentTurnSide === 'RIGHT');
+
+            animationFrameId = requestAnimationFrame(renderScene);
+        }
+
+        // Draw Stickman Team
+        function drawTeam(context, teamColor, baseX, ropeY, isActiveTurn) {
+            const isRed = teamColor === 'RED';
+            const colorPrimary = isRed ? '#ef4444' : '#3b82f6';
+            const colorDark = isRed ? '#991b1b' : '#1e40af';
+            const spacing = isRed ? -45 : 45;
+
+            for (let i = 0; i < 3; i++) {
+                const px = baseX + (i * spacing);
+                const py = ropeY + 25; // feet on ground
+
+                // Body lean angle based on pulling
+                const lean = isRed ? -8 : 8;
+
+                // Head
+                context.fillStyle = '#fde047'; // skin face
+                context.beginPath();
+                context.arc(px + (lean / 2), py - 45, 12, 0, Math.PI * 2);
+                context.fill();
+
+                // Bandana/Cap
+                context.fillStyle = colorPrimary;
+                context.beginPath();
+                context.arc(px + (lean / 2), py - 48, 12, Math.PI, Math.PI * 2);
+                context.fill();
+
+                // Eyes
+                context.fillStyle = '#0f172a';
+                const eyeOffset = isRed ? 2 : -2;
+                context.beginPath();
+                context.arc(px + (lean / 2) + eyeOffset, py - 46, 2, 0, Math.PI * 2);
+                context.fill();
+
+                // Body (Shirt)
+                context.strokeStyle = colorPrimary;
+                context.lineWidth = 14;
+                context.lineCap = 'round';
+                context.beginPath();
+                context.moveTo(px + lean, py - 32);
+                context.lineTo(px, py - 12);
+                context.stroke();
+
+                // Legs (Leaning Stance)
+                context.strokeStyle = colorDark;
+                context.lineWidth = 6;
+                ctx.beginPath();
+                // Front Leg
+                context.moveTo(px, py - 12);
+                context.lineTo(px + (isRed ? -12 : 12), py);
+                // Back Leg
+                context.moveTo(px, py - 12);
+                context.lineTo(px + (isRed ? 14 : -14), py);
+                context.stroke();
+
+                // Arms Gripping Rope
+                context.strokeStyle = '#fde047';
+                context.lineWidth = 5;
+                context.beginPath();
+                context.moveTo(px + (lean / 2), py - 30);
+                context.lineTo(px + (isRed ? 15 : -15), ropeY);
+                context.stroke();
+            }
+
+            // Exertion / Effort Effect for Active Team
+            if (isActiveTurn) {
+                context.fillStyle = '#f59e0b';
+                context.font = 'bold 12px sans-serif';
+                context.textAlign = 'center';
+                const labelX = isRed ? baseX - 45 : baseX + 45;
+                context.fillText('TARIK!', labelX, ropeY - 55);
+            }
+        }
+
+        /* ==========================================================================
+           5. GAME LOGIC & UI UPDATES
+           ========================================================================== */
+        
+        function updateUI() {
+            // Update Round Display
+            document.getElementById('roundDisplay').innerText = `${currentRound} / 8`;
+
+            // Update Scores
+            document.getElementById('scoreRed').innerText = scoreRed;
+            document.getElementById('scoreBlue').innerText = scoreBlue;
+
+            // Update Tug Meter Bar Position
+            // ropePosition ranges from -5 (Red) to +5 (Blue). Center is 0 -> 50%
+            const percentage = 50 + (ropePosition / 10) * 100;
+            const clampedPercentage = Math.max(5, Math.min(95, percentage));
+            document.getElementById('meterBar').style.width = `${clampedPercentage}%`;
+
+            // Update Target Rope Offset for Canvas Animation (-5 to 5)
+            targetRopeOffset = ropePosition;
+
+            // Check Turn Banner and Team Cards Highlight
+            const cardRed = document.getElementById('cardTeamRed');
+            const cardBlue = document.getElementById('cardTeamBlue');
+            const turnBanner = document.getElementById('turnBanner');
+            const teamTurnBadge = document.getElementById('teamTurnBadge');
+
+            if (currentTurnSide === 'LEFT') {
+                cardRed.classList.add('turn-active-red', 'border-red-500');
+                cardBlue.classList.remove('turn-active-blue', 'border-blue-500');
+                
+                turnBanner.className = "text-center py-2 px-4 rounded-xl text-xs sm:text-sm font-extrabold bg-red-600/20 text-red-300 border border-red-500/40 shadow";
+                turnBanner.innerHTML = `<i class="fa-solid fa-play mr-1"></i> GILIRAN BERAKSI: <span class="text-red-400">TIM MERAH (KIRI)</span>`;
+                
+                teamTurnBadge.className = "px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow";
+                teamTurnBadge.innerText = "Soal Untuk: TIM MERAH";
+            } else {
+                cardBlue.classList.add('turn-active-blue', 'border-blue-500');
+                cardRed.classList.remove('turn-active-red', 'border-red-500');
+                
+                turnBanner.className = "text-center py-2 px-4 rounded-xl text-xs sm:text-sm font-extrabold bg-blue-600/20 text-blue-300 border border-blue-500/40 shadow";
+                turnBanner.innerHTML = `<i class="fa-solid fa-play mr-1"></i> GILIRAN BERAKSI: <span class="text-blue-400">TIM BIRU (KANAN)</span>`;
+
+                teamTurnBadge.className = "px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-lg shadow";
+                teamTurnBadge.innerText = "Soal Untuk: TIM BIRU";
+            }
+
+            // Load Current Question Data
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const roundData = questionBank[currentRound - 1];
+            const currentQ = currentTurnSide === 'LEFT' ? roundData.left : roundData.right;
+
+            document.getElementById('topicBadge').innerText = roundData.topic;
+            document.getElementById('questionText').innerText = currentQ.question;
+
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 rounded-xl text-left text-sm sm:text-base font-bold bg-slate-900/80 hover:bg-slate-700/80 border border-slate-700 hover:border-amber-400/60 transition-all duration-200 text-slate-100 flex items-center justify-between shadow-md";
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <i class="fa-solid fa-circle-chevron-right text-slate-500 group-hover:text-amber-400 transition"></i>
+                `;
+                btn.onclick = () => handleAnswer(opt, currentQ);
+                optionsGrid.appendChild(btn);
+            });
+
+            isAnswerLocked = false;
+        }
+
+        function handleAnswer(selectedOption, currentQ) {
+            if (isAnswerLocked) return;
+            isAnswerLocked = true;
+
+            const isCorrect = selectedOption.correct;
+            let resultTitle = "";
+            let resultSub = "";
+
+            if (currentTurnSide === 'LEFT') {
+                // Tim Merah Turn
+                if (isCorrect) {
+                    scoreRed += 1;
+                    ropePosition -= 1; // Pull left
+                    playSound('correct');
+                    playSound('pull');
+                    resultTitle = "JAWABAN BENAR! (+1 Tim Merah)";
+                    resultSub = "Tim Merah berhasil menarik tali 1 langkah ke KIRI.";
+                } else {
+                    scoreBlue += 1;
+                    ropePosition += 1; // Pull right (penalty)
+                    playSound('wrong');
+                    playSound('pull');
+                    resultTitle = "JAWABAN SALAH! (+1 Tim Biru)";
+                    resultSub = "Tim Merah salah menjawab, tali ditarik 1 langkah ke KANAN oleh Tim Biru.";
+                }
+            } else {
+                // Tim Biru Turn
+                if (isCorrect) {
+                    scoreBlue += 1;
+                    ropePosition += 1; // Pull right
+                    playSound('correct');
+                    playSound('pull');
+                    resultTitle = "JAWABAN BENAR! (+1 Tim Biru)";
+                    resultSub = "Tim Biru berhasil menarik tali 1 langkah ke KANAN.";
+                } else {
+                    scoreRed += 1;
+                    ropePosition -= 1; // Pull left (penalty)
+                    playSound('wrong');
+                    playSound('pull');
+                    resultTitle = "JAWABAN SALAH! (+1 Tim Merah)";
+                    resultSub = "Tim Biru salah menjawab, tali ditarik 1 langkah ke KIRI oleh Tim Merah.";
+                }
+            }
+
+            // Limit boundary (-5 to +5)
+            ropePosition = Math.max(-5, Math.min(5, ropePosition));
+
+            // Show Explanation Modal
+            showExplanation(isCorrect, resultTitle, resultSub, currentQ.explanation);
+        }
+
+        function showExplanation(isCorrect, title, subtitle, explanation) {
+            const modal = document.getElementById('explanationModal');
+            const iconContainer = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultSub = document.getElementById('resultSubtitle');
+            const expText = document.getElementById('explanationText');
+
+            if (isCorrect) {
+                iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+                iconContainer.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                resultTitle.className = "text-lg font-black text-emerald-400";
+            } else {
+                iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg bg-red-500/20 text-red-400 border border-red-500/40";
+                iconContainer.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                resultTitle.className = "text-lg font-black text-red-400";
+            }
+
+            resultTitle.innerText = title;
+            resultSub.innerText = subtitle;
+            expText.innerText = explanation;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').classList.add('hidden');
+
+            // Check if game threshold reached or max rounds finished
+            if (ropePosition <= -5 || ropePosition >= 5) {
+                triggerGameOver();
+                return;
+            }
+
+            // Advance Turn Logic
+            if (currentTurnSide === 'LEFT') {
+                currentTurnSide = 'RIGHT';
+            } else {
+                currentTurnSide = 'LEFT';
+                currentRound += 1;
+            }
+
+            if (currentRound > 8) {
+                triggerGameOver();
+            } else {
+                updateUI();
+            }
+        }
+
+        function triggerGameOver() {
+            playSound('victory');
+            const victoryModal = document.getElementById('victoryModal');
+            const victoryTitle = document.getElementById('victoryTitle');
+            const victorySubtitle = document.getElementById('victorySubtitle');
+            
+            document.getElementById('finalScoreRed').innerText = scoreRed;
+            document.getElementById('finalScoreBlue').innerText = scoreBlue;
+
+            if (ropePosition < 0 || scoreRed > scoreBlue) {
+                victoryTitle.innerText = "TIM MERAH MENANG!";
+                victoryTitle.className = "text-2xl sm:text-3xl font-black text-red-400";
+                victorySubtitle.innerText = "Selamat! Tim Merah berhasil menguasai wilayah arena tarik tambang!";
+            } else if (ropePosition > 0 || scoreBlue > scoreRed) {
+                victoryTitle.innerText = "TIM BIRU MENANG!";
+                victoryTitle.className = "text-2xl sm:text-3xl font-black text-blue-400";
+                victorySubtitle.innerText = "Selamat! Tim Biru berhasil menguasai wilayah arena tarik tambang!";
+            } else {
+                victoryTitle.innerText = "PERMAINAN SERI!";
+                victoryTitle.className = "text-2xl sm:text-3xl font-black text-amber-400";
+                victorySubtitle.innerText = "Kekuasaan imbang! Kedua tim menunjukkan kemampuan matematika yang luar biasa!";
+            }
+
+            victoryModal.classList.remove('hidden');
+            startConfetti();
+        }
+
+        function resetGame() {
+            currentRound = 1;
+            currentTurnSide = 'LEFT';
+            scoreRed = 0;
+            scoreBlue = 0;
+            ropePosition = 0;
+            targetRopeOffset = 0;
+            currentRopeOffset = 0;
+            isAnswerLocked = false;
+
+            document.getElementById('victoryModal').classList.add('hidden');
+            document.getElementById('explanationModal').classList.add('hidden');
+            
+            updateUI();
+        }
+
+        /* ==========================================================================
+           6. CELEBRATORY CONFETTI SYSTEM
+           ========================================================================== */
+        function startConfetti() {
+            const confCanvas = document.getElementById('confettiCanvas');
+            const cCtx = confCanvas.getContext('2d');
+            confCanvas.width = confCanvas.parentElement.clientWidth;
+            confCanvas.height = confCanvas.parentElement.clientHeight;
+
+            const particles = [];
+            const colors = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#ec4899'];
+
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * confCanvas.width,
+                    y: Math.random() * confCanvas.height - confCanvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1
+                });
+            }
+
+            function drawConfetti() {
+                cCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    if (p.y > confCanvas.height) p.y = -10;
+
+                    cCtx.fillStyle = p.color;
+                    cCtx.fillRect(p.x, p.y, p.size, p.size);
+                });
+
+                if (!document.getElementById('victoryModal').classList.contains('hidden')) {
+                    requestAnimationFrame(drawConfetti);
+                }
+            }
+            drawConfetti();
+        }
+
+        /* ==========================================================================
+           7. INITIALIZATION ON LOAD
+           ========================================================================== */
+        window.onload = function() {
+            resizeCanvas();
+            renderScene();
+            updateUI();
+        };
+    </script>
+</body>
+</html>
